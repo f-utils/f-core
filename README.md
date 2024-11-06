@@ -1,6 +1,6 @@
 # About
 
-`futils` is a Python lib with general utils with an emphasis in a functional and procedural point of view. This means that we rarely use classes and methods and never use objects directly. When used, classes comes with static methods in order to define namespaces inside modules instead of to work as a blueprint for objects.
+`functional_utils` (or just `futils`) is a general utils Python lib made  with an emphasis in a functional and procedural point of view. This means that we rarely use classes and methods and never use objects directly. When used, classes comes with static methods in order to define namespaces inside modules instead of to work as a blueprint for objects.
 Furthermore, some Python methods are converted to plain functions.
 
 We follow a constructivist and unifying approach, making use of parametric polymorphisms. We begin by redefining, generalizing and unifying the basic builtin Python operations/methods, which are then used in the construction of additional functions.
@@ -92,8 +92,12 @@ git clone https://github.com/ximenesyuri/futils /path/to/venv/lib/python3.x/site
 ```bash
 /path/to/venv/bin/pip3 install functional_utils
 ```
+* With `poetry`:
+```bash
+poetry add functional_utils
+```
 
-> We suggest to import the lib `futils` as `from futils import *`.
+> We suggest to import the lib as `from functional_utils import *`.
 
 # Contributors
 
