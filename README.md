@@ -90,7 +90,7 @@ git clone https://github.com/ximenesyuri/futils /path/to/venv/lib/python3.x/site
 ``` 
 * With `pip`:
 ```bash
-/path/to/venv/bin/pip3 install futils
+/path/to/venv/bin/pip3 install functional_utils
 ```
 
 > We suggest to import the lib `futils` as `from futils import *`.
