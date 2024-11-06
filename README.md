@@ -86,7 +86,7 @@ http           core, json, path
 
 * With `git`: 
 ```bash
-git clone https://github.com/ximenesyuri/futils /path/to/venv/lib/python3.x/site-packages/futils
+git clone https://github.com/ximenesyuri/futils /path/to/venv/lib/python3.x/site-packages/functional_utils
 ``` 
 * With `pip`:
 ```bash
