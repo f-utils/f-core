@@ -7,7 +7,7 @@ def t(*args):
     return type(*args)
 
 def bl(x, Y):
-    from var import *
+    from var import is_cont
     if not isinstance(x, type) and isinstance(Y, type):
         if isinstance(x, Y):
             return True

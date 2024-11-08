@@ -1,5 +1,5 @@
 import datetime
-from . import op
+from op import *
 
 def date(timestamp):
     return datetime.datetime.fromtimestamp(int(timestamp)).strftime('%d/%m/%Y %H:%M:%S')
