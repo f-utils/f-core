@@ -1,4 +1,4 @@
-from core import *
+from futils.core import *
 from futils.mods import re as R
 from futils.mods import path as P
 from futils.mods import json as J

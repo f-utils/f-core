@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "functional-utils"
-version = "0.0.1"
+name = "futils"
+version = "0.0.0"
 description = "Functional-based utils for Python following a constructivist approach."
 authors = ["Yuri Ximenes <yxm.dev@gmx.ie>", "Rafael David <rafaeldvid42@gmail.com>"]
 license = "MIT"
@@ -11,6 +11,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.12"
+requests = "^2.32.3"
 
 [build-system]
 requires = ["poetry-core"]

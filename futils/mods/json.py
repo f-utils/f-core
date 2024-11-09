@@ -1,7 +1,8 @@
+from futils.core import op as op
+from futils.core import logs as logs
+from futils.core import iter as iter
+from futils.mods import re as R
 import json
-from . import op
-from . import logs
-from . import re as R
 import shlex
 import ast
 
@@ -23,13 +24,13 @@ def dumps(json_data):
 d = dumps
 
 def read(json_file):
-    with open(json_file, 'r', encoding='utf-8') as jf:
+    with n(json_file, 'r', encoding='utf-8') as jf:
         json_data = json.load(jf)
     return json_data
 r = read
 
 def write(output_json, json_data):
-    with open(output_json, 'w', encoding='utf-8') as jf:
+    with n(output_json, 'w', encoding='utf-8') as jf:
         json.dump(json_data, jf, indent=4)
 w = write
 
@@ -51,13 +52,13 @@ def intersection(json_data_1, json_data_2):
 cap = intersection
 
 def union(json_data_1, json_data_2):
-    result = json_data_1.copy()
-    for key, value in json_data_2.items():
+    result = json_data_1.c()
+    for key, value in iter.items(json_data_2):
         if key not in result:
             result[key] = value
         else:
             if op.bl(result[key], dict) and op.bl(value, dict):
-                result[key] = J.union(result[key], value)
+                result[key] = union(result[key], value)
             elif op.bl(result[key], list) and op.bl(value, list):
                 result[key] = list(set(result[key] + value))
             elif result[key] != value:
@@ -89,11 +90,11 @@ def grep_keys(json_data, search_string='', case_sensitive=True):
                 if match(key, search_string, case_sensitive):
                     keys_accumulator[key] = value
                 if op.bl(value, dict):
-                    nested_keys = J.grep_keys(value, search_string, case_sensitive)
+                    nested_keys = grep_keys(value, search_string, case_sensitive)
                     if nested_keys:
                         keys_accumulator[key] = nested_keys
                 elif op.bl(value, list):
-                    nested_keys_list = [J.grep_keys(item, search_string, case_sensitive) for item in value if op.bl(item, dict)]
+                    nested_keys_list = [grep_keys(item, search_string, case_sensitive) for item in value if op.bl(item, dict)]
                     nested_keys_list = [nk for nk in nested_keys_list if nk]
                     if nested_keys_list:
                         keys_accumulator[key] = nested_keys_list
@@ -109,7 +110,7 @@ def grep_values(json_data, search_string, case_sensitive=True):
         else:
             return op.lw(substring) in op.lw(string)
     values_accumulator = {}
-    if op.bl(json_data, dict):
+    if bl(json_data, dict):
         for key, value in json_data.items():
             if op.bl(value, dict):
                 nested_values = grep_values(value, search_string, case_sensitive)
@@ -150,22 +151,22 @@ def grep(json_data, search_string, case_sensitive=True):
         while i < len(tokens):
             token = tokens[i]
             if op.eq(token, "("):
-                op.add(stack, current_segment)
+                add(stack, current_segment)
                 current_segment = []
             elif op.eq(token, ")"):
                 expression = current_segment
-                current_segment = stack.pop()
-                op.add(expression, current_segment)
+                current_segment = stack.p
+                iter.add(expression, current_segment)
             elif token.upper() in ("AND", "OR", "NOT"):
-                op.add(op.up(token), current_segment)
-            elif op.eq(op.up(token), "WHERE"):
-                if (i + 1) < len(tokens) and op.up(tokens[i + 1]) not in ("AND", "OR", "NOT", "(", ")"):
-                    prev_token = current_segment.pop()
+                add(up(token), current_segment)
+            elif eq(up(token), "WHERE"):
+                if (i + 1) < len(tokens) and up(tokens[i + 1]) not in ("AND", "OR", "NOT", "(", ")"):
+                    prev_token = current_segment.p
                     where_term = tokens[i + 1]
-                    op.add((prev_token, where_term), current_segment)
+                    iter.add((prev_token, where_term), current_segment)
                     i += 1
             else:
-                op.add(token, current_segment)
+                iter.add(token, current_segment)
             i += 1
         return current_segment
 
@@ -176,13 +177,13 @@ def grep(json_data, search_string, case_sensitive=True):
         elif op.bl(expression_segment, list):
             result = process_expression(json_content, expression_segment[0])
             i = 1
-            while i < len(expression_segment):
+            while op.lt(i, len(expression_segment)):
                 if expression_segment[i] in ("AND", "OR"):
-                    operator = expression_segment[i]
+                    rator = expression_segment[i]
                     next_result = process_expression(json_content, expression_segment[i + 1])
-                    result = combine_results(result, next_result, operator)
+                    result = combine_results(result, next_result, rator)
                     i += 1
-                elif op.eq(expression_segment[i], "NOT"):
+                elif eq(expression_segment[i], "NOT"):
                     next_result = process_expression(json_content, expression_segment[i + 1])
                     result = remove(result, next_result)
                     i += 1
@@ -218,13 +219,13 @@ def grep(json_data, search_string, case_sensitive=True):
         else:
             logs.err("The entry 'WHERE' must be 'key', 'value', 'key AND value', 'value AND key', 'key OR value', or 'value OR key'.")
 
-    def combine_results(result1, result2, operator):
-        if operator == "AND":
+    def combine_results(result1, result2, rator):
+        if rator == "AND":
             return cap(result1, result2)
-        elif operator == "OR":
+        elif rator == "OR":
             return cup(result1, result2)
         else:
-            logs.err("Operator must be 'AND' or 'OR'.")
+            logs.err("rator must be 'AND' or 'OR'.")
 
     segments = parse_search_string(search_string)
     final_result = process_expression(json_data, segments)

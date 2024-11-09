@@ -1,7 +1,6 @@
 import re
-from . import op
-from . import logs
-from . import path as P
+from futils.core import *
+from futils.mods import path as P
 
 def is_(regex):
     if re.compile(regex):

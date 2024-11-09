@@ -1,8 +1,8 @@
-from . import op
-from . import logs
+from futils.core import op as op
+from futils.core import logs as logs
+from pathlib import Path
 import os
 import sys
-from pathlib import Path
 import inspect
 import fnmatch
 import shutil

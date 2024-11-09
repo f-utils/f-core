@@ -1,20 +1,11 @@
-import requests
-from . import op
-from . import logs
-from . import gen
-from . import path as P
-from . import json as J
+from futils.core import op as op
+from futils.core import logs as logs
+from futils.core import hash as hash
+from futils.mods import path as P
+from futils.mods import json as J
 import base64
 import json
-
-def bearer():
-    pass
-
-def api():
-    pass
-
-def basic():
-    pass
+import requests
 
 def encode_basic(user_pass):
         user_pass_str = f"{user_pass[0]}:{user_pass[1]}"
@@ -26,7 +17,7 @@ def auth(key, kind='bearer'):
         'Authorization: Bearer {key}'
     elif op.eq(kind, basic) or op.eq(op.lw(kind), 'basic'):
         if op.bl(key, str):
-            if gen.is_encoded(key):
+            if hash.is_encoded(key):
                 return {'Authorization': f'Basic {key}'}
             else:
                 logs.err(f'The string {key} is not a base64 encoded string.')
@@ -37,7 +28,7 @@ def auth(key, kind='bearer'):
                 logs.err('Provided list, tuple, or set must contain exactly two elements.')
         elif op.bl(key, dict):
             if op.eq(len(key), 2):
-                user_pass = next(iter(key.items()))
+                user_pass = next(iter(items(key)))
                 return encode_basic(user_pass)
             else:
                 logs.err('Provided dictionary must contain exactly two keys.')
