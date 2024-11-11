@@ -1,11 +1,30 @@
-import sys, os
-sys.path.append(os.path.abspath(__file__ + '/../' * 1))
+from futils import *
 from logs import *
 from op import *
+from typing import NamedTuple
 
-# def prod(*args)
+def typename(t):
+    return t().__class__.__name__
 
-# def coprod(*args)
+def prod(*types):
+    for t in types:
+        if nb(t, type):
+            err("Arguments must be types.")
+    fields = {f"t{i}": t for i, t in enum(types)}
+    return NamedTuple("ProductType", fields)
 
-def name(x):
-    return x().__class__.__name__
+def coprod(*types):
+    for t in types:
+        if nb(t, type):
+            err("Arguments must be types.")
+    class Coproduct:
+        def __new__(cls, value):
+            if nb(value, cls.valid_types):
+                err(f"Value must be one of the types: {[t.__name__ for t in cls.valid_types]}")
+            return value
+        @classmethod
+        def __instancecheck__(cls, instance):
+            return bl(instance, cls.valid_types)
+    Coproduct.valid_types = tuple(types)
+    return Coproduct
+
