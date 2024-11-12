@@ -36,7 +36,7 @@ class ColoredFormatter(logging.Formatter):
 
         return f'{color_code}{original_format}{self.RESET_CODE}'
 
-def custom_level(name, number, color, abbrev):
+def custom_log_level(name, number, color, abbrev):
     logging.addLevelName(number, name.upper())
 
     def log_method(self, message, *args, **kws):
@@ -47,7 +47,7 @@ def custom_level(name, number, color, abbrev):
     ColoredFormatter.COLOR_CODES[name.upper()] = color
     ColoredFormatter.LEVEL_NAME_MAPPING[name.upper()] = abbrev
 
-custom_level('DONE', 15, '\033[33m', 'ok!')
+custom_log_level('DONE', 15, '\033[33m', 'ok!')
 logger = None
 
 LOG_LEVELS_STR_MAP = {
@@ -58,7 +58,7 @@ LOG_LEVELS_STR_MAP = {
     'critical': logging.CRITICAL
 }
 
-def init(name='logs', level='debug', file=None, mb=1, bkps=1):
+def init_logs(name='logs', level='debug', file=None, mb=1, bkps=1):
     global logger
     logger = logging.getLogger(name)
     if isinstance(level, str):
@@ -84,12 +84,12 @@ def inf(message, *args):
 def ok(message, *args):
     logger.done(message, *args)
 def err(message, *args):
-    logger.error(message, *args)
+    logger.errors(message, *args)
 def wrn(message, *args):
     logger.warning(message, *args)
 
 def new_log(name, number, color, abbrev):
-    custom_level(name, number, color, abbrev)
+    custom_log_level(name, number, color, abbrev)
     def log_method(message, *args):
         getattr(logger, name.lower())(message, *args)
     globals()[name.lower()] = log_method
