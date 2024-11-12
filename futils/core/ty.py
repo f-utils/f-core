@@ -1,10 +1,9 @@
-from futils import *
-from logs import *
-from op import *
+from futils.core.logs import *
+from futils.core.op import *
 from typing import NamedTuple
 
-def typename(t):
-    return t().__class__.__name__
+def typename(x):
+    return x().__class__.__name__
 
 def prod(*types):
     for t in types:

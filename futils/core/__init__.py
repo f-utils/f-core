@@ -1,16 +1,13 @@
-import sys, os
-sys.path.append(os.path.dirname(__file__))
-
-from ansi import *
-from logs import *
-from op import *
-from cmd import *
-from date import *
-from hash import *
-from func import *
-from type import *
-from comp import *
-from iter import *
+from futils.core.ansi import *
+from futils.core.logs import *
+from futils.core.op import *
+from futils.core.cmd import *
+from futils.core.date import *
+from futils.core.hash import *
+from futils.core.func import *
+from futils.core.type import *
+from futils.core.comp import *
+from futils.core.iter import *
 
 
 

@@ -1,8 +1,6 @@
-import sys, os
-sys.path.append(os.path.abspath(__file__ + '/../' * 1))
-from logs import *
-from op import *
-from var import *
+from futils.core.logs import *
+from futils.core.op import *
+from futils.core.var import *
 
 def comprehension(f, Y, *args, position='right'):
     if n(is_iter(Y)):
