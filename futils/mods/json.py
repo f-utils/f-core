@@ -1,6 +1,7 @@
 from futils.core import op as op
 from futils.core import logs as logs
 from futils.core import iter as iter
+from futils.core import comp as comp
 from futils.mods import re as R
 import json
 import shlex
@@ -159,8 +160,8 @@ def grep(json_data, search_string, case_sensitive=True):
                 iter.add(expression, current_segment)
             elif token.upper() in ("AND", "OR", "NOT"):
                 add(up(token), current_segment)
-            elif eq(up(token), "WHERE"):
-                if (i + 1) < len(tokens) and up(tokens[i + 1]) not in ("AND", "OR", "NOT", "(", ")"):
+            elif op.eq(up(token), "WHERE"):
+                if (i + 1) < len(tokens) and comp.up(tokens[i + 1]) not in ("AND", "OR", "NOT", "(", ")"):
                     prev_token = current_segment.p
                     where_term = tokens[i + 1]
                     iter.add((prev_token, where_term), current_segment)
