@@ -45,7 +45,8 @@ def sleep(n):
 
 def run(command, **kargs):
     command_list = command.format_map({**globals(), **locals(), **kargs}).split()
-    return subprocess.run(command_list)
+    process = subprocess.run(command_list, capture_output=True, text=True)
+    return process.stderr, process.stdout
 
 def which(command):
     return run(f'which {command}')
