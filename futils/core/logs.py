@@ -84,7 +84,7 @@ def inf(message, *args):
 def ok(message, *args):
     logger.done(message, *args)
 def err(message, *args):
-    logger.errors(message, *args)
+    logger.error(message, *args)
 def wrn(message, *args):
     logger.warning(message, *args)
 
