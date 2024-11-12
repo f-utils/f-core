@@ -152,14 +152,14 @@ def grep(json_data, search_string, case_sensitive=True):
         while i < len(tokens):
             token = tokens[i]
             if op.eq(token, "("):
-                add(stack, current_segment)
+                iter.add(stack, current_segment)
                 current_segment = []
             elif op.eq(token, ")"):
                 expression = current_segment
                 current_segment = stack.p
                 iter.add(expression, current_segment)
             elif token.upper() in ("AND", "OR", "NOT"):
-                add(comp.up(token), current_segment)
+                iter.add(comp.up(token), current_segment)
             elif op.eq(comp.up(token), "WHERE"):
                 if (i + 1) < len(tokens) and comp.up(tokens[i + 1]) not in ("AND", "OR", "NOT", "(", ")"):
                     prev_token = current_segment.p
