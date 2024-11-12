@@ -1,4 +1,5 @@
 from futils.core.logs import *
+import types
 
 # PRIMITIVE OPERATIONS
 def t(*args):
