@@ -45,10 +45,10 @@ def sleep(n):
 
 def run(command, **kargs):
     command_list = command.format_map({**globals(), **locals(), **kargs}).split()
-    subprocess.run(command_list)
+    return subprocess.run(command_list)
 
 def which(command):
-    run(f'which {command}')
+    return run(f'which {command}')
 # > print(which('ls'))
 
 def kill(status):
