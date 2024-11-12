@@ -2,7 +2,7 @@ import sys, os
 sys.path.append(os.path.abspath(__file__ + '/../' * 1))
 import futils.core.op as op
 from futils.core.logs import *
-import futils.core.type as ty
+import futils.core.ty as ty
 import inspect
 import types
 
