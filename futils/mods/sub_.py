@@ -1,5 +1,4 @@
 import subprocess
-from futils.core import *
 
 class SubErr(Exception):
     pass

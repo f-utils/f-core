@@ -1,8 +1,8 @@
 from futils.core import op as op
 from futils.core import logs as logs
 from futils.core import hash as hash
-from futils.mods import path as P
-from futils.mods import json as J
+from futils.mods import path_ as P
+from futils.mods import json_ as J
 import base64
 import json
 import requests

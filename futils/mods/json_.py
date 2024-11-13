@@ -2,7 +2,7 @@ from futils.core import op as op
 from futils.core import logs as logs
 from futils.core import iter as iter
 from futils.core import comp as comp
-from futils.mods import re as R
+from futils.mods import re_ as R
 import json
 import shlex
 import ast
@@ -133,21 +133,54 @@ gv = g_v
 
 def query(json_data, entry):
     keys = entry.split('.')
-    value = json_data
+    current_values = [json_data]  # Start with the top-level JSON data
+
     for key in keys:
-        if '[' in key and ']' in key:
-            base_key, index = key.split('[')
-            index = index.rstrip(']')
-            value = value[base_key]
-            if index:
-                value = value[int(index)]
+        next_values = []
+
+        for value in current_values:
+            if '[]' in key:
+                base_key = key.replace('[]', '')
+
+                # Ensure the current value has the base key and it is a list
+                if base_key in value and isinstance(value[base_key], list):
+                    for item in value[base_key]:
+                        next_values.append(item)
             else:
-                pass
-        else:
-            value = value[key]
-    return value
-jq = query
-q = query
+                # Apply the key directly for dictionaries
+                if isinstance(value, dict):
+                    if key in value:
+                        next_values.append(value[key])
+                elif isinstance(value, list):
+                    # Access the key for each item in the list if it's a dictionary
+                    for item in value:
+                        if isinstance(item, dict) and key in item:
+                            next_values.append(item[key])
+
+        current_values = next_values
+
+    return current_values
+
+bla = {
+ "Buckets": [
+  {
+   "CreationDate": "2024-11-10T19:50:49.000Z",
+   "Name": "bin"
+  },
+  {
+   "CreationDate": "2024-10-30T19:16:51.000Z",
+   "Name": "tokens"
+  }
+ ],
+ "Owner": {
+  "DisplayName": "24c4fff6-4931-493a-b3b7-942f22032021",
+  "ID": "24c4fff6-4931-493a-b3b7-942f22032021"
+ }
+}
+
+echo(query(bla, 'Owner'))
+
+print('aaa')
 
 def grep(json_data, search_string, case_sensitive=True):
     def match(string, substring, case_sensitive):

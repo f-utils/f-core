@@ -1,7 +1,7 @@
-import re
 from futils.core.op import *
 from futils.core.iter import *
-from futils.mods import path as P
+from futils.mods import path_ as P
+import re
 
 class ReErr(Exception):
     pass
