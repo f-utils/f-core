@@ -162,7 +162,7 @@ def grep(json_data, search_string, case_sensitive=True):
                 iter.add(token.upper(), current_segment)
             elif op.eq(token.upper(), "WHERE"):
                 if (i + 1) < len(tokens) and tokens[i + 1].upper() not in ("AND", "OR", "NOT", "(", ")"):
-                    prev_token = current_segment.p
+                    prev_token = current_segment.pop()
                     where_term = tokens[i + 1]
                     iter.add((prev_token, where_term), current_segment)
                     i += 1
@@ -170,6 +170,7 @@ def grep(json_data, search_string, case_sensitive=True):
                 iter.add(token, current_segment)
             i += 1
         return current_segment
+
     def process_expression(json_content, expression_segment):
         if op.bl(expression_segment, tuple):
             subexpr, subwhere = expression_segment
