@@ -46,4 +46,4 @@ def kill(status):
     sys.kill(status)
 
 def rse(ErrClass, message):
-    raise ErrClass('message')
+    raise ErrClass(message)
