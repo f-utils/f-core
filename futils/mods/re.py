@@ -1,5 +1,6 @@
 import re
-from futils.core import *
+from futils.core.op import *
+from futils.core.iter import *
 from futils.mods import path as P
 
 class ReErr(Exception):
@@ -33,31 +34,31 @@ f = find
 
 def begins(string, regex):
     regex = r'^' + regex
-    if op.ne(grep(string, regex), None):
+    if ne(grep(string, regex), None):
         return True
     return False
 b = begins
 
 def ends(string, regex):
     regex = regex + r'$'
-    if op.ne(grep(regex, string), None):
+    if ne(grep(regex, string), None):
         return True
     return False
 e = ends
 
 def get_lines(regex, file_path):
     matched_lines = []
-    content_lines = P.lines(file_path)
+    content_lines = P.gl(file_path)
     for line in content_lines:
         if grep(line, regex):
-            op.add(line, matched_lines)
+            add(line, matched_lines)
     return matched_lines
 gl = get_lines
 
 def between_lines(regex_start, regex_end, file_path):
     content_between_lines = []
     capture = False
-    content_lines = P.lines(file_path)
+    content_lines = P.gl(file_path)
     for line in content_lines:
         if grep(line, regex_start):
             capture = True
@@ -65,8 +66,8 @@ def between_lines(regex_start, regex_end, file_path):
         if grep(line, regex_end):
             break
         if capture:
-            op.add(line, content_between_lines)
-    return op.tostr(content_between_lines, "\n")
+            add(line, content_between_lines)
+    return to_str(content_between_lines, "\n")
 b_lines = between_lines
 b_l = b_lines
 bl = b_l

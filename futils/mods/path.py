@@ -80,7 +80,7 @@ wb = write_binary
 
 def get_lines(file):
     return r(file).splitlines()
-gl = lines
+gl = get_lines
 l = gl
 
 def basename(x):

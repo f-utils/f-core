@@ -1,6 +1,6 @@
 # About
 
-`functional_utils` (or just `futils`) is a general utils Python lib made  with an emphasis in a functional and procedural point of view. This means that we rarely use classes and methods and never use objects directly. When used, classes comes with static methods in order to define namespaces inside modules instead of to work as a blueprint for objects.
+`futils` is a general utils Python lib made  with an emphasis in a functional and procedural point of view. This means that we rarely use classes and methods and never use objects directly. When used, classes comes with static methods in order to define namespaces inside modules instead of to work as a blueprint for objects.
 Furthermore, some Python methods are converted to plain functions.
 
 We follow a constructivist and unifying approach, making use of parametric polymorphisms. We begin by redefining, generalizing and unifying the basic builtin Python operations/methods, which are then used in the construction of additional functions.
@@ -35,7 +35,7 @@ lib            description
 asci           definition of asci colors
 logs           definition and configuration of logs
 op             generalized basic operations
-cmd            basic python commands and shell commands
+cmd            basic python commands
 date           functions related to date and time
 hash           hashable types based functions
 iter           iterable-based functions
@@ -52,7 +52,8 @@ lib            description
 re             regex-based functions
 path           functions related to the path type
 json           operations for json data/files
-http           http operations         
+http           http operations
+sub            subprocesses operations            
 ```
 
 # Interdependence
@@ -90,12 +91,16 @@ git clone https://github.com/ximenesyuri/futils /path/to/venv/lib/python3.x/site
 ``` 
 * With `pip`:
 ```bash
-/path/to/venv/bin/pip3 install functional_utils
+/path/to/venv/bin/pip3 install git+https://github.com/ximenesyuri/futils
 ```
 * With `poetry`:
 ```bash
-poetry add functional_utils
+poetry add git+https://github.com/ximenesyuri/futils
 ```
+
+# Philosophy
+
+...
 
 > We suggest to import the lib as `from functional_utils import *`.
 
