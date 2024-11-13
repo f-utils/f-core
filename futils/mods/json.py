@@ -12,26 +12,26 @@ def is_(json_data):
         return True
 i = is_
 
+def dumps(json_data, tab=4):
+    return json.dumps(json_data, indent=tab)
+d = dumps
+
 def echo(json_data, tab=4):
-    print(json.dumps(json_data, indent=tab))
+    print(dumps(json_data, tab=tab))
 e = echo
 
 def loads(json_data):
     return json.loads(json_data)
 l = loads
 
-def dumps(json_data):
-    return json.dumps(json_data, indent=4)
-d = dumps
-
 def read(json_file):
-    with n(json_file, 'r', encoding='utf-8') as jf:
+    with open(json_file, 'r', encoding='utf-8') as jf:
         json_data = json.load(jf)
     return json_data
 r = read
 
 def write(output_json, json_data):
-    with n(output_json, 'w', encoding='utf-8') as jf:
+    with open(output_json, 'w', encoding='utf-8') as jf:
         json.dump(json_data, jf, indent=4)
 w = write
 
@@ -53,8 +53,8 @@ def intersection(json_data_1, json_data_2):
 cap = intersection
 
 def union(json_data_1, json_data_2):
-    result = json_data_1.c()
-    for key, value in iter.items(json_data_2):
+    result = json_data_1.copy()
+    for key, value in json_data_2.items():
         if key not in result:
             result[key] = value
         else:
@@ -81,9 +81,9 @@ def grep_keys(json_data, search_string='', case_sensitive=True):
         if case_sensitive:
             return substring in string
         else:
-            return op.lw(substring) in op.lw(string)
+            return comp.lw(substring) in comp.lw(string)
     if op.nl(search_string):
-        return op.gk(json_data)
+        return iter.gk(json_data)
     else:
         keys_accumulator = {}
         if op.bl(json_data, dict):
@@ -109,9 +109,9 @@ def grep_values(json_data, search_string, case_sensitive=True):
         if case_sensitive:
             return substring in string
         else:
-            return op.lw(substring) in op.lw(string)
+            return comp.lw(substring) in comp.lw(string)
     values_accumulator = {}
-    if bl(json_data, dict):
+    if op.bl(json_data, dict):
         for key, value in json_data.items():
             if op.bl(value, dict):
                 nested_values = grep_values(value, search_string, case_sensitive)
@@ -142,7 +142,7 @@ def grep(json_data, search_string, case_sensitive=True):
         if case_sensitive:
             return substring in string
         else:
-            return op.lw(substring) in op.lw(string)
+            return comp.lw(substring) in comp.lw(string)
 
     def parse_search_string(search_string):
         stack = []
@@ -183,7 +183,7 @@ def grep(json_data, search_string, case_sensitive=True):
                     next_result = process_expression(json_content, expression_segment[i + 1])
                     result = combine_results(result, next_result, rator)
                     i += 1
-                elif eq(expression_segment[i], "NOT"):
+                elif op.eq(expression_segment[i], "NOT"):
                     next_result = process_expression(json_content, expression_segment[i + 1])
                     result = remove(result, next_result)
                     i += 1
@@ -204,7 +204,7 @@ def grep(json_data, search_string, case_sensitive=True):
             if op.bl(json_content, dict):
                 for k, v in json_content.items():
                     match_key = match(k, search_term, case_sensitive)
-                    match_value = match(str(v), search_term, case_sensitive) if op.n(bl)(v, dict) else False
+                    match_value = match(str(v), search_term, case_sensitive) if op.nb(v, dict) else False
                     if match_key and match_value:
                         result[k] = v
                     elif op.bl(v, dict):
@@ -219,13 +219,13 @@ def grep(json_data, search_string, case_sensitive=True):
         else:
             logs.err("The entry 'WHERE' must be 'key', 'value', 'key AND value', 'value AND key', 'key OR value', or 'value OR key'.")
 
-    def combine_results(result1, result2, rator):
-        if rator == "AND":
+    def combine_results(result1, result2, operator):
+        if operator == "AND":
             return cap(result1, result2)
-        elif rator == "OR":
+        elif operator == "OR":
             return cup(result1, result2)
         else:
-            logs.err("rator must be 'AND' or 'OR'.")
+            logs.err("operator must be 'AND' or 'OR'.")
 
     segments = parse_search_string(search_string)
     final_result = process_expression(json_data, segments)
