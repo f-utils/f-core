@@ -1,5 +1,6 @@
 from futils.core import op as op
-from futils.core import logs as logs
+from futils.core.cmd import *
+from futils.core.iter import *
 from pathlib import Path
 import os
 import sys
@@ -7,10 +8,7 @@ import inspect
 import fnmatch
 import shutil
 
-def rel():
-    pass
-
-def abs():
+class PathErr(Exception):
     pass
 
 def resolve(x):
@@ -25,16 +23,7 @@ isa = is_a
 def is_rel(x):
     return op.n(is_abs)(x)
 is_r = is_rel
-isrel = is_rel
 isr = is_r
-
-def file():
-    pass
-f = file
-
-def dir():
-    pass
-d = dir
 
 def is_file(x):
     return os.path.isfile(x)
@@ -47,16 +36,16 @@ is_d = is_dir
 isd = is_d
 
 def is_(x, kind):
-    if (op.eq(kind, a) or op.eq(kind, 'abs')) and isa(x):
+    if op.eq(kind, 'abs') and isa(x):
         return True
-    elif (op.eq(kind, r) or op.eq(kind, 'rel')) and isr(x):
+    elif op.eq(kind, 'rel') and isr(x):
         return True
-    elif (op.eq(kind, f) or op.eq(kind, 'file')) and isf(x):
+    elif op.eq(kind, 'file') and isf(x):
             return True
-    elif (op.eq(kind, d) or op.eq(kind, 'dir')) and isd(x):
+    elif op.eq(kind, 'dir') and isd(x):
             return True
     else:
-        logs.err('The kind must be abs/rel/file/dir.')
+        rse(PathErr, 'The kind must be abs/rel/file/dir.')
 i = is_
 
 def read(x, encoding='utf-8'):
@@ -69,7 +58,6 @@ def read_binary(x):
     with open(x, 'rb') as f:
         content = f.read()
     return content
-r_binary = read_binary
 rb = read_binary
 
 def write(x, content='', encoding='utf-8', overwrite=True):
@@ -88,26 +76,21 @@ def write_binary(x, content='', overwrite=True):
     else:
         with open(x, 'wb') as f:
             f.write(content)
-w_binary = write_binary
-wb = w_binary
+wb = write_binary
 
-def lines(file):
-    content = r(file)
-    return content.splitlines()
-l = lines
+def get_lines(file):
+    return r(file).splitlines()
+gl = lines
+l = gl
 
 def basename(x):
     return rsl(x).name
-base_name = basename
-b_n  = base_name
-bn = b_n
+bn = basename
 
 def filename(x):
     name, _ = os.path.splitext(bn(x))
     return name
-file_name = filename
-f_n  = file_name
-fn = f_n
+fn = filename
 
 def extension(x):
     _, ext = os.path.splitext(bn(x))
@@ -116,17 +99,15 @@ ext = extension
 
 def dirname(x):
     return rsl(x).parent
-dir_name = dirname
-d_n = dir_name
-dn = d_n
+dn = dirname
 
 def name(x, kind):
-    if op.eq(kind, d) or op.eq(kind, 'dir'):
-        dn(x)
-    elif op.eq(kind, f) or op.eq(kind, 'file'):
-        fn(x)
+    if op.eq(kind, 'dir'):
+        return dn(x)
+    elif op.eq(kind, 'file'):
+        return fn(x)
     else:
-        logs.err('The kind must be dir/file.')
+        rse(PathErr, 'The kind must be dir/file.')
 n = name
 
 def split(x):
@@ -164,55 +145,53 @@ sub = lt
 def mkdir(path):
     os.makedirs(path, exist_ok=True)
 make_dir = mkdir
-mk_d = make_dir
-mkd = mk_d
+mkd = make_dir
 
 def touch(x):
     mkd(nd(x))
     w(x)
 make_file = touch
-mk_f = make_file
-mkf = mk_f
+mkf = make_file
 
 def make(x, kind):
-    if op.eq(kind, d) or op.eq(kind, 'dir'):
+    if op.eq(kind, 'dir'):
         mkd(x)
-    elif op.eq(kind, f) or op.eq(kind, 'file'):
+    elif op.eq(kind, 'file'):
         mkf(x)
     else:
-        logs.err('The kind must be file/dir.')
+        rse(PathErr, 'The kind must be file/dir.')
 mk = make
 
 def list_files(x):
-    files = []
+    files = list()
     for f in os.listdir(x):
         if isf(cup(x, f)):
-            files += [cup(x, f)]
+            add(list(cup(x,f)), files)
     return files
 ls_files = list_files
 lsf = ls_files
 
 def list_dirs(x):
-    dirs = []
+    dirs = list()
     for d in os.listdir(x):
         if isd(cup(x, d)):
-            dirs += [cup(x, d)]
+            add(list(cup(x, d)), dirs)
     return dirs
 ls_dirs = list_dirs
 lsd = ls_dirs
 
 def ls(x, kind=None):
     if op.eq(kind, None):
-        return [f for f in os.listdir(x)]
+        return list(f for f in os.listdir(x))
     elif op.eq(kind, d) or op.eq(kind, 'dir'):
         return lsd(x)
     elif op.eq(kind, f) or op.eq(kind, 'file'):
         return lsf(x)
     else:
-        logs.err('kind must be empty, file or dir')
+        rse(PathErr, 'kind must be empty, file or dir')
 
 def find(path, regex, kind=None, mindepth=0, maxdepth=float('inf')):
-    matches = {"files": [], "dirs": []} if kind is None else []
+    matches = dict(files=list(), dirs=list()) if kind is None else list()
     for root, dirnames, filenames in os.walk(path):
         depth = root[len(path):].count(os.sep)
         if op.lt(depth, mindepth):
@@ -235,8 +214,9 @@ def find(path, regex, kind=None, mindepth=0, maxdepth=float('inf')):
                 else:
                     matches["dirs"].append(path)
         if  op.nb(kind, [None, Path.f, Path.d]):
-            logs.err("Invalid kind. Use Path.file, Path.dir, or None.")
+            rse(PathErr, "Invalid kind. Use Path.file, Path.dir, or None.")
     return matches
+f = find
 
 def copy_file(input_path, output_path):
     if isf(input_path):
@@ -245,20 +225,18 @@ def copy_file(input_path, output_path):
             shutil.copy2(input_path, cup(output_path, file_name))
         shutil.copy2(input_path, output_path)
     else:
-        logs.err(f'The file {input_path} does not exists.')
+        rse(PathErr, f'The file {input_path} does not exists.')
 cp_file = copy_file
-cp_f = cp_file
-cpf = cp_f
+cpf = cp_file
 
 def copy_dir(input_path, output_path):
     if isd(input_path):
         if not os.path.exists(destination_directory):
             shutil.copytree(input_path, output_path)
-        logs.err(f'The path {output_path} already exists')
-    logs.err(f'The dir {input_path} does not exists.')
+        rse(PathErr, f'The path {output_path} already exists.')
+    rse(PathErr, f'The dir {input_path} does not exists.')
 cp_dir = copy_dir
-cp_d = cp_dir
-cpd = cp_d
+cpd = cp_dir
 
 def copy(input_path, output_path):
     if isf(input_path):
@@ -266,5 +244,5 @@ def copy(input_path, output_path):
     elif isd(input_path):
         cpd(input_path, output_path)
     else:
-        logs.err(f'{input_path} does not exists.')
+        rse(PathErr, f'{input_path} does not exists.')
 cp = copy

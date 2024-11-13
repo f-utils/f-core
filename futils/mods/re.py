@@ -2,6 +2,9 @@ import re
 from futils.core import *
 from futils.mods import path as P
 
+class ReErr(Exception):
+    pass
+
 def is_(regex):
     if re.compile(regex):
         return re.compile(regex)

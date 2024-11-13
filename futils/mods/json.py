@@ -7,6 +7,9 @@ import json
 import shlex
 import ast
 
+class JsonErr(Exception):
+    pass
+
 def is_(json_data):
     if json.loads(json_data):
         return True
@@ -132,7 +135,16 @@ def query(json_data, entry):
     keys = entry.split('.')
     value = json_data
     for key in keys:
-        value = value[key]
+        if '[' in key and ']' in key:
+            base_key, index = key.split('[')
+            index = index.rstrip(']')
+            value = value[base_key]
+            if index:
+                value = value[int(index)]
+            else:
+                pass
+        else:
+            value = value[key]
     return value
 jq = query
 q = query

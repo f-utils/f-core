@@ -7,6 +7,9 @@ import base64
 import json
 import requests
 
+class HttpErr(Exception):
+    pass
+
 def encode_basic(user_pass):
         user_pass_str = f"{user_pass[0]}:{user_pass[1]}"
         encoded = base64.b64encode(user_pass_str.encode('utf-8')).decode('utf-8')
