@@ -2,7 +2,6 @@ from futils.core.logs import *
 from futils.core.op import *
 import hashlib
 import time
-import subprocess
 import base64
 
 def include(entry):
@@ -43,14 +42,8 @@ rnd = random
 def sleep(n):
     return time.sleep(n)
 
-def run(command, **kargs):
-    command_list = command.format_map({**globals(), **locals(), **kargs}).split()
-    process = subprocess.run(command_list, capture_output=True, text=True)
-    return process.stderr, process.stdout
-
-def which(command):
-    return run(f'which {command}')
-# > print(which('ls'))
-
 def kill(status):
     sys.kill(status)
+
+def rse(ErrClass, message):
+    raise ErrClass('message')
