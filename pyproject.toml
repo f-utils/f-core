@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "futils"
-version = "0.0.21"
+version = "0.0.1"
 description = "Functional-based utils for Python following a constructivist approach."
 authors = ["Yuri Ximenes <yxm.dev@gmx.ie>", "Rafael David <rafaeldvid42@gmail.com>"]
 license = "MIT"

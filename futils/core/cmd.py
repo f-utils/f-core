@@ -45,5 +45,9 @@ def sleep(n):
 def kill(status):
     sys.kill(status)
 
-def rse(ErrClass, message):
-    raise ErrClass(message)
+init_logs()
+def rse(ErrClass, message, rse_msg=message):
+    err(message)
+    raise ErrClass(rse_message)
+
+rse(TypeError, 'dasdas' 'dassddadasd aa daad as')
