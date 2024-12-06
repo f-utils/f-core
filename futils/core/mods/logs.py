@@ -1,16 +1,16 @@
 import logging
 from logging.handlers import RotatingFileHandler
+from .ansi import *
 
 class ColoredFormatter(logging.Formatter):
     COLOR_CODES = {
-        'DEBUG': '\033[94m',
-        'INFO': '\033[92m',
-        'WARNING': '\033[93m',
-        'ERROR': '\033[91m',
-        'CRITICAL': '\033[95m',
-        'DONE': '\033[33m'
+        'DEBUG': bright_blue_,
+        'INFO': bright_green_,
+        'WARNING': bright_yellow_,
+        'ERROR': bright_red_,
+        'CRITICAL': bright_magenta_,
+        'DONE': yellow_
     }
-    RESET_CODE = '\033[0m'
 
     LEVEL_NAME_MAPPING = {
         'DEBUG': 'log',
@@ -21,20 +21,21 @@ class ColoredFormatter(logging.Formatter):
         'DONE': 'ok!'
     }
 
+    def __init__(self, log_format=None, date_format=None):
+        super().__init__(log_format or '%(asctime)s | %(levelname)s | %(message)s', 
+                         datefmt=date_format or '%H:%M | %d/%m/%Y')
+
     def format(self, record):
         original_levelname = record.levelname
         if record.levelname in self.LEVEL_NAME_MAPPING:
             record.levelname = self.LEVEL_NAME_MAPPING[record.levelname]
-        log_record_format = '%(asctime)s | %(levelname)s | %(message)s'
-        self._style._fmt = log_record_format
-        self.datefmt = '%H:%M | %d/%m/%Y'
 
         original_format = super().format(record)
 
         record.levelname = original_levelname
-        color_code = self.COLOR_CODES.get(record.levelname, self.RESET_CODE)
+        colored_message = self.COLOR_CODES.get(record.levelname, lambda x: x)(original_format)
 
-        return f'{color_code}{original_format}{self.RESET_CODE}'
+        return colored_message
 
 def custom_log_level(name, number, color, abbrev):
     logging.addLevelName(number, name.upper())
@@ -44,10 +45,10 @@ def custom_log_level(name, number, color, abbrev):
             self._log(number, message, args, **kws)
 
     setattr(logging.Logger, name.lower(), log_method)
-    ColoredFormatter.COLOR_CODES[name.upper()] = color
+    ColoredFormatter.COLOR_CODES[name.upper()] = ansi_color_(color)
     ColoredFormatter.LEVEL_NAME_MAPPING[name.upper()] = abbrev
 
-custom_log_level('DONE', 15, '\033[33m', 'ok!')
+custom_log_level('DONE', 16, ANSI_COLORS['YELLOW'], 'ok!')
 logger = None
 
 LOG_LEVELS_STR_MAP = {
@@ -58,7 +59,15 @@ LOG_LEVELS_STR_MAP = {
     'critical': logging.CRITICAL
 }
 
-def init_logs(name='logs', level='debug', file=None, mb=1, bkps=1):
+def init_logs(
+        name='logs',
+        level='debug',
+        log_format=None,
+        date_format=None,
+        file=None,
+        mb=2,
+        bkps=1
+    ):
     global logger
     logger = logging.getLogger(name)
     if isinstance(level, str):
@@ -66,11 +75,11 @@ def init_logs(name='logs', level='debug', file=None, mb=1, bkps=1):
     if not logger.hasHandlers():
         logger.setLevel(level)
         console_handler = logging.StreamHandler()
-        formatter = ColoredFormatter()
+        formatter = ColoredFormatter(log_format, date_format)
         console_handler.setFormatter(formatter)
         logger.addHandler(console_handler)
         if file:
-            max_bytes = mb * 1024 * 1024
+            max_bytes = mb * 1025 * 1024
             file_handler = RotatingFileHandler(
                 file, maxBytes=max_bytes, backupCount=bkps)
             file_handler.setFormatter(formatter)

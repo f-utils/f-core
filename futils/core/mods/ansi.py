@@ -71,9 +71,4 @@ bright_magenta_ = ansi_color_(ANSI_COLORS['BRIGHT_MAGENTA'])
 bright_cyan_ = ansi_color_(ANSI_COLORS['BRIGHT_CYAN'])
 bright_white_ = ansi_color_(ANSI_COLORS['BRIGHT_WHITE'])
 
-print(italic_(bright_green_("italic bright green")))
-print(green_(underline_("green underline")))
-print(red_("red, bold", 'bold'))
-print(underline_(italic_(blue_("underline italic blue"))))
-print(underline_(italic_(blue_("underline italic blue, bold", 'bold'))))
 

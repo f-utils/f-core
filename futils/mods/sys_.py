@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-class SubErr(Exception):
+class SysErr(Exception):
     pass
 
 def run(cmd, envs=None, **kargs):

@@ -1,21 +1,9 @@
-[tool.poetry]
+[project]
 name = "futils"
-version = "0.0.2"
-description = "Functional-based utils for Python following a constructivist approach."
-authors = ["Yuri Ximenes <yxm.dev@gmx.ie>", "Rafael David <rafaeldvid42@gmail.com>"]
-license = "MIT"
+version = "0.0.0"
+description = "Add your description here"
 readme = "README.md"
-packages = [
-    { include = "futils" }
+requires-python = ">=3.12"
+dependencies = [
+    "requests>=2.32.3",
 ]
-
-[tool.poetry.dependencies]
-python = "^3.12"
-requests = "^2.32.3"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
-
-

@@ -1,10 +1,14 @@
-from futils.core.ansi import *
-from futils.core.logs import *
-from futils.core.op import *
-from futils.core.cmd import *
-from futils.core.date import *
-from futils.core.hash import *
-from futils.core.func import *
-from futils.core.ty import *
-from futils.core.comp import *
-from futils.core.iter import *
+import sys
+import os
+sys.path.append(os.path.dirname(__file__))
+
+from core.mods.ansi import *
+from core.mods.logs import *
+from core.mods.op import *
+from core.mods.cmd import *
+from core.mods.date import *
+from core.mods.hash import *
+from core.mods.func import *
+from core.mods.ty import *
+from core.mods.comp import *
+from core.mods.iter import *
