@@ -1,46 +1,37 @@
-```
-  /$$$$$$             /$$     /$$ /$$
- /$$__  $$           | $$    |__/| $$
+=====================================================
+
+  /$$$$$$             /$$     /$$ /$$          
+ /$$__  $$           | $$    |__/| $$          
 | $$  \__//$$   /$$ /$$$$$$   /$$| $$  /$$$$$$$
 | $$$$   | $$  | $$|_  $$_/  | $$| $$ /$$_____/
-| $$_/   | $$  | $$  | $$    | $$| $$|  $$$$$$
+| $$_/   | $$  | $$  | $$    | $$| $$|  $$$$$$ 
 | $$     | $$  | $$  | $$ /$$| $$| $$ \____  $$
 | $$     |  $$$$$$/  |  $$$$/| $$| $$ /$$$$$$$/
-|__/      \______/    \___/  |__/|__/|_______/
-``` 
+|__/      \______/    \___/  |__/|__/|_______/ 
 
-# About
+=====================================================
 
-`futils` is a general utils Python lib made  with an emphasis in a functional and procedural point of view. This means that we rarely use classes and methods and never use objects directly, and that one focus primarily on functions. When defined, classes are endowed with static methods in order to create namespaces inside modules instead of to work as a blueprint for objects.
-Furthermore, some Python methods are converted to plain functions.
+ABOUT
+    _futils_ is a general utils Python lib made  with an emphasis in a functional and procedural point of view. This means that we rarely use classes and methods and never use objects directly, and that one focus primarily on functions. When defined, classes are endowed with static methods in order to create namespaces inside modules instead of to work as a blueprint for objects.
+    Furthermore, some Python methods are converted to plain functions.
 
-We follow a constructivist and unifying approach, making use of parametric polymorphisms. We begin by redefining, generalizing and unifying the basic builtin Python operations/methods, which are then used in the construction of additional functions.
+    We addopt a constructivist and unifying approach, making use of parametric polymorphisms. We begin by redefining, generalizing and unifying the basic builtin Python operations/methods, which are then used in the construction of additional functions. This is made following a custom structure that ensure type safety since from the beginning.
 
-# Structure
+    > Futils is about functions.
 
-The utils are divided into two categories:
-1. `core`: primitive generic functions, to be called directly, without a namespace.
-2. `mods`: context-based functions, consuming the core utils, to be called inside a namespace.
+STRUCTURE
+    The utils in _futils_ appears into two categories:
+    1. _core_: primitive generic functions, to be called directly, without a namespace.
+    2. _more_: context-based functions, consuming the core utils, to be called inside a namespace.
 
-```
-futils/
-  |-- __init__.py ............. importing everything in core and each mod in a custom namespace
-  |-- core/ ................... with the core utils 
-  |   |-- core.py ............. the core of everything
-  |   `-- mods/ ............... the core functions
-  |       |-- ansi.py ......... where ansi stuff are defined
-  |       |-- err.py .......... where error classes are reviewed
-  |       |-- logs.py ......... where logs standards are introduced
-  |       `-- ...
-  |  
-  `-- mods/ ................... with the mods
-      |-- re.py ............... regex-based module
-      |-- path.py ............. anything related to paths
-      |-- http.py ............. http-based functions
-      `-- ...
-```
+    futils/
+    |-- __init__.py
+    |-- core/ ................... core utils   
+    `-- more/ ................... context-based utils
+    
+THE CORE
+    The core has no dependences. They are formed by 
 
-# Core
 
 ```
 lib            description
