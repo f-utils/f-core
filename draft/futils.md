@@ -50,10 +50,10 @@ spec=(name, domain, body, std)
 ```
 
 * Tem-se os seguintes "métodos" principais:
-    1. `init`: inicializa uma função com `domain` vazio: `init('nome', retorno_padrao)`
+    1. `func`: inicializa uma função com `domain` vazio: `init('nome', retorno_padrao)`
     2. `extend`: adiciona uma entrada no domínio e no corpo de uma função já inicializada. `extend(nome, tipo_x, retorno_tipo_x)`
     3. `update`: modifica corpo ou retorno padrão de uma função.
 
 
-> Para onde o `futils` vai.
-> [safe](https://github.com/ximenesyuri/safe)
+> É para onde o `futils` vai.
+> [ximenesyuri/safe](https://github.com/ximenesyuri/safe)
