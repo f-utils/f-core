@@ -1,12 +1,15 @@
 [project]
 name = "f-core"
 version = "0.0.0"
-description = "Add your description here"
+description = "The f-utils lib with primitive functions"
 readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "f",
+requires-python = ">=3.6"
+license = {text = "MIT"}
+authors = [
+    {name = "Yuri Ximenes", email = "yx.dev@gmx.ie"},
 ]
 
-[tool.uv.sources]
-f = { git = "https://github.com/f-utils/f" }
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+    
