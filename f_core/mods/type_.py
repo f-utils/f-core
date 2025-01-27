@@ -2,6 +2,74 @@ from f import f
 import inspect
 from typing import get_type_hints
 
+# the class with bare types
+class Types:
+    class func:
+        def __init__(self, func):
+            if not callable(func):
+                raise funcErr(f"'{func}' is not a function.")
+            self._func = func
+
+        def __call__(self, *args, **kwargs):
+            return self._func(*args, **kwargs)
+
+        def __mul__(self, other):
+            if not isinstance(other, f.func):
+                raise funcErr(f"'{other}'is not a function: the composition is defined only between functions.")
+            def comp_(*args, **kwargs):
+                return self._func(other(*args, **kwargs))
+            return f.func(comp_)
+
+    class typed_func:
+        def __init__(self, func: Callable):
+            if not callable(func):
+                raise funcErr(f"{func} is not a function.")
+            self.func = func
+            self.annotations = self._get_type_hints(func)
+
+        def _get_type_hints(self, obj) -> Dict[str, Any]:
+            return inspect.getfullargspec(obj).annotations
+
+        @property
+        def domain(self):
+            param_types = {k: v for k, v in self.annotations.items() if k != 'return'}
+            return self._create_domain_class(param_types)
+
+        def _create_domain_class(self, param_types) -> type:
+            class _domain:
+                def __init__(self, *args):
+                    if len(args) != len(param_types):
+                        raise TypeError("Number of arguments must match the parameter types.")
+                    for arg, (param, expected_type) in zip(args, param_types.items()):
+                        if not isinstance(arg, expected_type):
+                            raise TypeError(f"Argument {param} must be of type {expected_type.__name__}.")
+
+                @classmethod
+                def validate(cls, value_type: type) -> bool:
+                    return issubclass(value_type, list(param_types.values())[0]) if param_types else False
+
+                def __repr__(self):
+                    return f"_domain({', '.join(f'{param}: {expected_type.__name__}' for param, expected_type in param_types.items())})"
+            return _domain
+
+        @property
+        def codomain(self) -> Any:
+            return self.annotations.get('return', None)
+
+        def __call__(self, *args, **kwargs):
+            return self.func(*args, **kwargs)
+
+        def __mul__(self, other: Callable):
+            if not isinstance(other, Callable):
+                raise funcErr(f"'{other}' is not a function.")
+            other_func = typed_func(other)
+            if not self.domain.validate(other_func.codomain):
+                raise funcErr(f"Codomain '{self.func.codomain}' of '{self.func}' is not a subtype of the domain '{other_func.domain}' of '{other_func}'.")
+            def comp_(*args, **kwargs):
+                return self.func(other(*args, **kwargs))
+            return typed_func(comp_)
+t = Types
+
 class Builder:
     def type_coprod_(*types):
         for typ in types:
@@ -78,7 +146,20 @@ class Builder:
                 raise ValueError(f"Condition not satisfied for this instance.")
     return _sub
 
-# define coprod dspec
+# define 'attr' spec
+f.s.i(
+    'attr_',
+    'attribute something to a given entity',
+    lambda *args, **kwargs: 'The variable types cannot be attributed to some entity.'
+)
+
+f.s.e(
+    'attr_',
+    (type, str, type),
+    lambda x, y, z: setattr(x, y, z)
+)
+
+# define 'coprod' dspec
 f.ds.i(
     'coprod_',
     'the coproduct of entities',
@@ -91,7 +172,7 @@ f.ds.e(
     Builder.type_coprod_
 )
 
-# define prod dspec
+# define 'prod' dspec
 f.ds.i(
     'prod_',
     'the product of entities',
@@ -104,7 +185,7 @@ f.ds.e(
     Builder.type_prod_
 )
 
-# define unordered prod dspec
+# define 'unordered prod' dspec
 f.ds.i(
     'unprod_',
     'the unordered product of entities',
@@ -117,7 +198,7 @@ f.ds.e(
     Builder.type_unprod_
 )
 
-# define func dspec
+# define 'func' dspec
 f.ds.i(
     'func_',
     'the function entity of entities',
