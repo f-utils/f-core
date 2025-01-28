@@ -139,22 +139,24 @@ class Builder:
         if not isinstance(cod, type):
             raise TypeError(f"{cod} is not a valid type.")
 
-        base_func_type = Builder.func_type_(*domain_types)
-
-        class _typed_func(type(base_func_type)):
+        class _typed_func(type):
             def __instancecheck__(cls, instance):
                 if not isinstance(instance, TypedFunc):
-                    return False
+                    try:
+                        instance = TypedFunc(instance)
+                        return instance
+                    except:
+                       return False
 
-                is_domain_match = instance.domain == Builder.prod_type_(*domain_types)
-                is_codomain_match = instance.codomain == cod
+                is_domain_match = isinstance(Builder.prod_type_(*domain_types), type(instance.domain))
+                is_codomain_match = isinstance(cod, type(instance.codomain))
 
                 return is_domain_match and is_codomain_match
 
         domain_type_names = ", ".join(t.__name__ for t in domain_types)
         class_name = f"tfunc_({domain_type_names}; {cod.__name__})"
 
-        return _typed_func(class_name, (base_func_type,), {}) 
+        return _typed_func(class_name, (), {})
 
     def sub_type_(X, f):
         class _sub(X):

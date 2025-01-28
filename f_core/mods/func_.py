@@ -1,10 +1,5 @@
 from f import f
 
-f.t.i(
-    f.func,
-    'special functions'
-)
-
 f.s.i(
     'curry_',
     'a general curry function',
@@ -17,11 +12,11 @@ def _curry(f, x):
     else:
         return lambda *args: f(x, *args)
 
-f.s.e(
-    'curry_',
-    (f.func, tuple),
-    _curry
-)
+# f.s.e(
+#     'curry_',
+#     (f.func, tuple),
+#     _curry
+# )
 
-print(f.s.info('curry_'))
+#print(f.s.info('curry_'))
 
