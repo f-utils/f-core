@@ -17,11 +17,11 @@ class TypedFunc:
             param.annotation if param.annotation != inspect.Parameter.empty else type(None)
             for param in self.signature.parameters.values()
         ]
-        return Builder.prod_type_(*param_types) 
+        return Builder.prod_type_(*param_types)
 
     def calculate_codomain(self):
         return_annotation = inspect.signature(self.func).return_annotation
-        return return_annotation if return_annotation != inspect.Signature.empty else type(None) 
+        return return_annotation if return_annotation != inspect.Signature.empty else type(None)
 
     @property
     def domain(self):
@@ -115,7 +115,7 @@ class Builder:
             _types = types
         return unprod_
 
-    def func_type_(*expected_types):
+    def func_type_(*domain_types):
         class _func(type):
             def __instancecheck__(cls, instance):
                 if not callable(instance):
@@ -124,13 +124,39 @@ class Builder:
                 type_hints = get_type_hints(instance)
                 param_hints = list(type_hints.values())[:-1]
 
-                return param_hints == list(expected_types)
+                return param_hints == list(domain_types)
 
         class func_(metaclass=_func):
-            _types = expected_types
+            _types = domain_types
         return func_
 
-    def type_sub_(X, f):
+    def typed_func_type_(*domain_types, cod):
+        if not domain_types:
+            raise TypeError("Domain types cannot be empty.")
+        for typ in domain_types:
+            if not isinstance(typ, type):
+                raise TypeError(f"{typ} is not a valid type.")
+        if not isinstance(cod, type):
+            raise TypeError(f"{cod} is not a valid type.")
+
+        base_func_type = Builder.func_type_(*domain_types)
+
+        class _typed_func(type(base_func_type)):
+            def __instancecheck__(cls, instance):
+                if not isinstance(instance, TypedFunc):
+                    return False
+
+                is_domain_match = instance.domain == Builder.prod_type_(*domain_types)
+                is_codomain_match = instance.codomain == cod
+
+                return is_domain_match and is_codomain_match
+
+        domain_type_names = ", ".join(t.__name__ for t in domain_types)
+        class_name = f"tfunc_({domain_type_names}; {cod.__name__})"
+
+        return _typed_func(class_name, (base_func_type,), {}) 
+
+    def sub_type_(X, f):
         class _sub(X):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
@@ -202,6 +228,19 @@ class Specs:
         'func_',
         f.t.E().keys(),
         Builder.func_type_
+    )
+
+    # define 'tfunc' dspec
+    f.ds.i(
+        'tfunc_',
+        'the typed function entity of entities',
+        lambda *args, **kwargs: 'Typed function entity not defined for the variable types.'
+    )
+
+    f.ds.e(
+        'tfunc_',
+        f.t.E().keys(),
+        Builder.typed_func_type_
     )
 
     # # define sub dspec
