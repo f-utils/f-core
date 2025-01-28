@@ -17,7 +17,6 @@ class TypedFunc:
             param.annotation if param.annotation != inspect.Parameter.empty else type(None)
             for param in self.signature.parameters.values()
         ]
-        print(f"Param types for {self.func.__name__}: {param_types}")  # Debugging line
         return Builder.prod_type_(*param_types) 
 
     def calculate_codomain(self):
@@ -36,16 +35,16 @@ class TypedFunc:
         return self.func(*args, **kwargs)
 
     def __mul__(self, other):
-        if not isinstance(other, Types.typed_func):
+        if not isinstance(other, TypedFunc):
             raise TypeError(f"'{other}' is not a valid typed function.")
 
         if not issubclass(other.codomain, self.domain):
-            raise TypeError(f"Codomain '{self.codomain.__name__}' of '{self.func.__name__}' is not a subtype of the domain '{other.domain.__name__}' of '{other.func.__name__}'.")
+            raise TypeError(f"Codomain '{other.codomain.__name__}' of '{other.func.__name__}' is not a subtype of the domain '{self.domain.__name__}' of '{self.func.__name__}'.")
 
         def composed(*args, **kwargs):
-            return other(self.func(*args, **kwargs))
+            return self.func(other.func(*args, **kwargs))
 
-        return Types.typed_func(composed)
+        return TypedFunc(composed)
 
 class Builder:
     def coprod_type_(*types):
