@@ -2,76 +2,58 @@ from f import f
 import inspect
 from typing import get_type_hints
 
-# the class with bare types
-class Types:
-    class func:
-        def __init__(self, func):
-            if not callable(func):
-                raise funcErr(f"'{func}' is not a function.")
-            self._func = func
 
-        def __call__(self, *args, **kwargs):
-            return self._func(*args, **kwargs)
+class TypedFunc:
+    def __init__(self, func):
+        if not callable(func):
+            raise TypeError(f"'{func}' is not a function.")
+        self.func = func
+        self.signature = inspect.signature(func)
+        self._domain = self.calculate_domain()
+        self._codomain = self.calculate_codomain()
 
-        def __mul__(self, other):
-            if not isinstance(other, f.func):
-                raise funcErr(f"'{other}'is not a function: the composition is defined only between functions.")
-            def comp_(*args, **kwargs):
-                return self._func(other(*args, **kwargs))
-            return f.func(comp_)
+    def calculate_domain(self):
+        param_types = [
+            param.annotation if param.annotation != inspect.Parameter.empty else type(None)
+            for param in self.signature.parameters.values()
+        ]
+        print(f"Param types for {self.func.__name__}: {param_types}")  # Debugging line
+        return Builder.prod_type_(*param_types) 
 
-    class typed_func:
-        def __init__(self, func: Callable):
-            if not callable(func):
-                raise funcErr(f"{func} is not a function.")
-            self.func = func
-            self.annotations = self._get_type_hints(func)
+    def calculate_codomain(self):
+        return_annotation = inspect.signature(self.func).return_annotation
+        return return_annotation if return_annotation != inspect.Signature.empty else type(None) 
 
-        def _get_type_hints(self, obj) -> Dict[str, Any]:
-            return inspect.getfullargspec(obj).annotations
+    @property
+    def domain(self):
+        return self._domain
 
-        @property
-        def domain(self):
-            param_types = {k: v for k, v in self.annotations.items() if k != 'return'}
-            return self._create_domain_class(param_types)
+    @property
+    def codomain(self):
+        return self._codomain
 
-        def _create_domain_class(self, param_types) -> type:
-            class _domain:
-                def __init__(self, *args):
-                    if len(args) != len(param_types):
-                        raise TypeError("Number of arguments must match the parameter types.")
-                    for arg, (param, expected_type) in zip(args, param_types.items()):
-                        if not isinstance(arg, expected_type):
-                            raise TypeError(f"Argument {param} must be of type {expected_type.__name__}.")
+    def __call__(self, *args, **kwargs):
+        return self.func(*args, **kwargs)
 
-                @classmethod
-                def validate(cls, value_type: type) -> bool:
-                    return issubclass(value_type, list(param_types.values())[0]) if param_types else False
+    def __mul__(self, other):
+        if not isinstance(other, Types.typed_func):
+            raise TypeError(f"'{other}' is not a valid typed function.")
 
-                def __repr__(self):
-                    return f"_domain({', '.join(f'{param}: {expected_type.__name__}' for param, expected_type in param_types.items())})"
-            return _domain
+        if not issubclass(other.codomain, self.domain):
+            raise TypeError(f"Codomain '{self.codomain.__name__}' of '{self.func.__name__}' is not a subtype of the domain '{other.domain.__name__}' of '{other.func.__name__}'.")
 
-        @property
-        def codomain(self) -> Any:
-            return self.annotations.get('return', None)
+        def composed(*args, **kwargs):
+            return other(self.func(*args, **kwargs))
 
-        def __call__(self, *args, **kwargs):
-            return self.func(*args, **kwargs)
-
-        def __mul__(self, other: Callable):
-            if not isinstance(other, Callable):
-                raise funcErr(f"'{other}' is not a function.")
-            other_func = typed_func(other)
-            if not self.domain.validate(other_func.codomain):
-                raise funcErr(f"Codomain '{self.func.codomain}' of '{self.func}' is not a subtype of the domain '{other_func.domain}' of '{other_func}'.")
-            def comp_(*args, **kwargs):
-                return self.func(other(*args, **kwargs))
-            return typed_func(comp_)
-t = Types
+        return Types.typed_func(composed)
 
 class Builder:
-    def type_coprod_(*types):
+    def coprod_type_(*types):
+        if len(types) == 0:
+            return type(None)
+        elif len(types) == 1:
+            return types[0]
+
         for typ in types:
             if not isinstance(typ, type):
                 raise TypeError(f"{typ} is not a valid type.")
@@ -84,7 +66,12 @@ class Builder:
             _types = types
         return coprod_
 
-    def type_prod_(*types):
+    def prod_type_(*types):
+        if len(types) == 0:
+            return type(None)
+        elif len(types) == 1:
+            return types[0]
+
         for typ in types:
             if not isinstance(typ, type):
                 raise TypeError(f"{typ} is not a valid type.")
@@ -97,33 +84,39 @@ class Builder:
                     return False
                 return all(isinstance(elem, typ) for elem, typ in zip(instance, cls._types))
 
-        class prod_(metaclass=_prod):
-            _types = types
+        class_name = f"prod_({', '.join(t.__name__ for t in types)})"
+        prod_ = _prod(class_name, (), {"_types": types})
         return prod_
 
-    def type_unprod_(*types):
+    def unprod_type_(*types):
+        if len(types) == 0:
+            return None
+        elif len(types) == 1:
+            return types[0]
+
         for typ in types:
             if not isinstance(typ, type):
                 raise TypeError(f"{typ} is not a valid type.")
 
         class _unprod(type):
-        def __instancecheck__(cls, instance):
-            if not isinstance(instance, set):
-                return False
-            type_counts = {typ: types.count(typ) for typ in types}
-            for elem in instance:
-                for typ in type_counts:
-                    if isinstance(elem, typ) and type_counts[typ] > 0:
-                        type_counts[typ] -= 1
-                        break
-                else:
+            def __instancecheck__(cls, instance):
+                if not isinstance(instance, set):
                     return False
-            return all(count == 0 for count in type_counts.values())
+                type_counts = {typ: types.count(typ) for typ in types}
+                for elem in instance:
+                    for typ in type_counts:
+                        if isinstance(elem, typ) and type_counts[typ] > 0:
+                            type_counts[typ] -= 1
+                            break
+                    else:
+                        return False
+                return all(count == 0 for count in type_counts.values())
+
         class unprod_(metaclass=_unprod):
             _types = types
         return unprod_
 
-    def type_func_(*expected_types):
+    def func_type_(*expected_types):
         class _func(type):
             def __instancecheck__(cls, instance):
                 if not callable(instance):
@@ -140,88 +133,89 @@ class Builder:
 
     def type_sub_(X, f):
         class _sub(X):
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            if not f(self):
-                raise ValueError(f"Condition not satisfied for this instance.")
-    return _sub
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                if not f(self):
+                    raise ValueError(f"Condition {f} not satisfied for this instance.")
+        return _sub
 
-# define 'attr' spec
-f.s.i(
-    'attr_',
-    'attribute something to a given entity',
-    lambda *args, **kwargs: 'The variable types cannot be attributed to some entity.'
-)
+class Specs:
+    # define 'attr' spec
+    f.s.i(
+        'attr_',
+        'attribute something to a given entity',
+        lambda *args, **kwargs: 'The variable types cannot be attributed to some entity.'
+    )
 
-f.s.e(
-    'attr_',
-    (type, str, type),
-    lambda x, y, z: setattr(x, y, z)
-)
+    f.s.e(
+        'attr_',
+        (type, str, type),
+        lambda x, y, z: setattr(x, y, z)
+    )
 
-# define 'coprod' dspec
-f.ds.i(
-    'coprod_',
-    'the coproduct of entities',
-    lambda *args, **kwargs: 'Coproduct not defined for the variable types.'
-)
+    # define 'coprod' dspec
+    f.ds.i(
+        'coprod_',
+        'the coproduct of entities',
+        lambda *args, **kwargs: 'Coproduct not defined for the variable types.'
+    )
 
-f.ds.e(
-    'coprod_',
-    f.t.E().keys(),
-    Builder.type_coprod_
-)
+    f.ds.e(
+        'coprod_',
+        f.t.E().keys(),
+        Builder.coprod_type_
+    )
 
-# define 'prod' dspec
-f.ds.i(
-    'prod_',
-    'the product of entities',
-    lambda *args, **kwargs: 'Product not defined for the variable types.'
-)
+    # define 'prod' dspec
+    f.ds.i(
+        'prod_',
+        'the product of entities',
+        lambda *args, **kwargs: 'Product not defined for the variable types.'
+    )
 
-f.ds.e(
-    'prod_',
-    f.t.E().keys(),
-    Builder.type_prod_
-)
+    f.ds.e(
+        'prod_',
+        f.t.E().keys(),
+        Builder.prod_type_
+    )
 
-# define 'unordered prod' dspec
-f.ds.i(
-    'unprod_',
-    'the unordered product of entities',
-    lambda *args, **kwargs: 'Unordered product not defined for the variable types.'
-)
+    # define 'unordered prod' dspec
+    f.ds.i(
+        'unprod_',
+        'the unordered product of entities',
+        lambda *args, **kwargs: 'Unordered product not defined for the variable types.'
+    )
 
-f.ds.e(
-    'unprod_',
-    f.t.E().keys(),
-    Builder.type_unprod_
-)
+    f.ds.e(
+        'unprod_',
+        f.t.E().keys(),
+        Builder.unprod_type_
+    )
 
-# define 'func' dspec
-f.ds.i(
-    'func_',
-    'the function entity of entities',
-    lambda *args, **kwargs: 'Function entity not defined for the variable types.'
-)
+    # define 'func' dspec
+    f.ds.i(
+        'func_',
+        'the function entity of entities',
+        lambda *args, **kwargs: 'Function entity not defined for the variable types.'
+    )
 
-f.ds.e(
-    'func_',
-    f.t.E().keys(),
-    Builder.type_func_
-)
+    f.ds.e(
+        'func_',
+        f.t.E().keys(),
+        Builder.func_type_
+    )
 
-# define sub dspec
-f.s.i(
-    'sub_',
-    'build a subobject from a given object',
-    lambda *args, **kwargs: 'Subobject not defined for the variable types.'
-)
+    # # define sub dspec
+    # f.s.i(
+    #     'sub_',
+    #     'build a subobject from a given object',
+    #     lambda *args, **kwargs: 'Subobject not defined for the variable types.'
+    # )
 
-f.s.e(
-    'sub_',
-    type,
-)
+    # f.s.e(
+    #     'sub_',
+    #     type,
+    # )
 
 
 
