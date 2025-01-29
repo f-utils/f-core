@@ -1,4 +1,5 @@
 import inspect
+from typing import get_type_hints
 from f import f
 from f_core.mods.utils import flat_, func_instance_
 
@@ -7,6 +8,9 @@ class TypedFunc:
         if not callable(func):
             raise TypeError(f"'{func}' is not a function.")
         self.func = func
+        self._type_hints = get_type_hints(func)
+        if not self._type_hints:
+            raise TypeError(f"The function '{func.__name__}' lacks type hints.")
         self._domain = self.calculate_domain()
         self._codomain = self.calculate_codomain()
 
@@ -33,7 +37,25 @@ class TypedFunc:
         return self._codomain
 
     def __call__(self, *args, **kwargs):
-        return self.func(*args, **kwargs)
+        bound_args = inspect.signature(self.func).bind(*args, **kwargs)
+        bound_args.apply_defaults()
+
+        for arg_name, arg_value in bound_args.arguments.items():
+            if arg_name in self._type_hints:
+                expected_type = self._type_hints[arg_name]
+                if not isinstance(arg_value, expected_type):
+                    raise TypeError(f"Argument '{arg_name}' is not of type '{expected_type.__name__}'.")
+        try:
+            result = self.func(*args, **kwargs)
+        except Exception as e:
+            raise TypeError(f"Function '{self.func.__name__}' raised an error: {e}")
+
+        if 'return' in self._type_hints:
+            expected_return_type = self._type_hints['return']
+            if not isinstance(result, expected_return_type):
+                raise TypeError(f"Return '{result}' is not of type '{expected_return_type.__name__}'.")
+
+        return result
 
     def __mul__(self, other):
         if not isinstance(other, TypedFunc):
@@ -103,6 +125,7 @@ class Builder:
 
         return prod_
 
+# TODO: add  flexible case for unprod
     def unprod_type_(*types):
         if len(types) == 0:
             return None
@@ -304,16 +327,16 @@ class Specs:
         Builder.typed_func_type_
     )
 
-    # # define sub dspec
-    # f.s.i(
-    #     'sub_',
-    #     'build a subobject from a given object',
-    #     lambda *args, **kwargs: 'Subobject not defined for the variable types.'
-    # )
+    # define sub dspec
+    f.s.i(
+        'sub_',
+        'build a subobject from a given object',
+        lambda *args, **kwargs: 'Subobject not defined for the variable types.'
+    )
 
     # f.s.e(
     #     'sub_',
-    #     type,
+    #     (type, tfunc_(type, cod=bool)
     # )
 
 
