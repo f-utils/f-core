@@ -1,11 +1,52 @@
+class Helper:
+    def flat_(*types):
+        if not types:
+            return (), None
+        for typ in types:
+            if not isinstance(typ, type) and not isinstance(typ, list):
+                raise TypeError(f"{typ.__name__} is not a valid type.")
+        is_flexible = False
+        flat_types = ()
+
+        if len(types) == 1 and isinstance(types[0], list):
+            is_flexible = True
+            flat_types = tuple(types[0])
+        else:
+            flat_types = types
+
+        return (flat_types, is_flexible)
+
+    def func_instance_(instance, flat_types, is_flexible, cod=None):
+        if not isinstance(instance, TypedFunc):
+            try:
+                instance = TypedFunc(instance)
+            except:
+                return False
+        if not callable(instance):
+            return False
+
+        type_hints = get_type_hints(instance.func)
+        domain_hints = tuple(type_hints.values())[:-1]
+        if cod:
+            return_hint = tuple(type_hints.values())[-1]
+            if not return_hint == cod:
+                return False
+
+        if is_flexible:
+            for x in domain_hints:
+                if not x in flat_types:
+                    return False
+            return True
+        return domain_hints == flat_types
+
 def coprod_type_(*types):
     """
     Build the 'coproduct' of types:
         > an object 'p' of the coproduct between 'X, Y, ...'
         > is an object of some of 'X, Y, ...'
     """
-    flat_types = flat_(*types)[0]
-    is_flexible = flat_(*types)[1]
+    flat_types = Helper.flat_(*types)[0]
+    is_flexible = Helper.flat_(*types)[1]
 
     if len(flat_types) == 0:
         return type(None)
@@ -33,8 +74,8 @@ def prod_type_(*types):
         > are the tuples '(x, y, ...)' such that
         > 'x, y, ...' are in 'X, Y, ...'
     """
-    flat_types = flat_(*types)[0]
-    is_flexible = flat_(*types)[1]
+    flat_types = Helper.flat_(*types)[0]
+    is_flexible = Helper.flat_(*types)[1]
 
     if len(flat_types) == 0:
         return type(None)
@@ -42,6 +83,7 @@ def prod_type_(*types):
         return flat_types[0]
 
     class _prod(type):
+        _types = flat_types
         def __instancecheck__(cls, instance):
             if not isinstance(instance, tuple):
                 return False
@@ -55,6 +97,9 @@ def prod_type_(*types):
                         return False
                 return True
             return all(isinstance(elem, typ) for elem, typ in zip(instance, flat_types))
+
+        def __iter__(cls):
+            return iter(flat_types)
 
     if is_flexible:
         class_name = f"prod_[{', '.join(t.__name__ for t in flat_types)}]"

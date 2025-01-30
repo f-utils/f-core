@@ -4,11 +4,10 @@ from f_core.mods.type.op_ import prod_type_
 
 
 def runtime_domain(func):
-    signature = inspect.signature(func)
-    domain_types = tuple(param.annotation for param in signature.parameters.values() if param.annotation is not param.empty)
-    if domain_types:
-        return prod_type_(*domain_types)
-    return type(None)
+    def wrapper(*args, **kwargs):
+        types_at_runtime = tuple(type(arg) for arg in args)
+        return prod_type_(*types_at_runtime)
+    return wrapper
 
 def runtime_codomain(func):
     signature = inspect.signature(func)
@@ -19,37 +18,30 @@ def runtime_codomain(func):
 
 def hinted_domain(func):
     type_hints = get_type_hints(func)
-    domain_hints = tuple(type_hints.values())[:-1]
-    if domain_hints:
+    if not type_hints:
+        return type(None)
+    domain_hints = [type_hints[param] for param in inspect.signature(func).parameters if param in type_hints]
+    if len(domain_hints) == 1:
+        return domain_hints[0]
+    elif domain_hints:
         return prod_type_(*domain_hints)
     return type(None)
 
 def hinted_codomain(func):
     type_hints = get_type_hints(func)
-    return_hint = tuple(type_hints.values())[-1]
-    if return_hint:
-        return return_hint
+    if 'return' in type_hints:
+        return type_hints['return']
     return type(None)
 
-def check_domain(func):
-    signature = inspect.signature(func)
-    param_names = list(signature.parameters.keys())
-    runtime_dom = runtime_domain(func)
-    hinted_dom = hinted_domain(func)
-
-    if runtime_dom != hinted_dom:
-        mismatches = [
-            (name, rt, ht) for name, rt, ht in zip(param_names, runtime_dom, hinted_dom)
-            if rt != ht
-        ]
-        mismatch_str = "\n> ".join(
-            f"'{name}': received '{rt.__name__}' while expecting '{ht.__name__}'."
-            for name, rt, ht in mismatches
-        )
-        raise TypeError(
-            f"Function '{func.__name__}': Runtime domain does not match hinted domain. Mismatches:\n {mismatch_str}"
-        )
-    return True
+def check_domain(func, param_names, expected_types, actual_types):
+    mismatches = [
+        f"\n   - '{name}': should be '{expected.__name__}', but got '{actual.__name__}'"
+        for name, expected, actual in zip(param_names, expected_types, actual_types)
+        if expected != actual
+    ]
+    if mismatches:
+        mismatch_str = "".join(mismatches)+"."
+        raise TypeError(f"Domain mismatch in func '{func.__name__}': {mismatch_str}")
 
 def check_codomain(func):
     runtime_cod = runtime_codomain(func)
@@ -76,43 +68,3 @@ def typed_comp(f, g):
         raise TypeError(f"Typed codomain of 'f' does not match typed domain of 'g'.")
     return lambda *args, **kwargs: g.func(f.func(*args, **kwargs))
 
-
-def flat_(*types):
-    if not types:
-        return None
-    for typ in types:
-        if not isinstance(typ, type) and not isinstance(typ, list):
-            raise TypeError(f"{typ.__name__} is not a valid type.")
-    is_flexible = False
-    flat_types = ()
-
-    if len(types) == 1 and isinstance(types[0], list):
-        is_flexible = True
-        flat_types = tuple(types[0])
-    else:
-        flat_types = types
-
-    return (flat_types, is_flexible)
-
-def func_instance_(instance, flat_types, is_flexible, cod=None):
-    if not isinstance(instance, TypedFunc):
-        try:
-            instance = TypedFunc(instance)
-        except:
-            return False
-    if not callable(instance):
-        return False
-
-    type_hints = get_type_hints(instance.func)
-    domain_hints = tuple(type_hints.values())[:-1]
-    if cod:
-        return_hint = tuple(type_hints.values())[-1]
-        if not return_hint == cod:
-            return False
-
-    if is_flexible:
-        for x in domain_hints:
-            if not x in flat_types:
-                return False
-        return True
-    return domain_hints == flat_types

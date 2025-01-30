@@ -38,60 +38,6 @@ class PlainFunc:
         return PlainFunc(comp)
 
 
-# -----------------------------
-#       Runtimed Functions
-# -----------------------------
-class RuntimedDomFunc(PlainFunc):
-    """
-    The class of 'domain-runtimed functions':
-        1. defined domain (at runtime)
-        2 defined comp
-    It is a subclass of 'PlainFunc'
-    """
-    def __init__(self, func):
-        super().__init__(func)
-        self._runtime_domain = runtime_domain(func)
-
-    @property
-    def domain(self):
-        return self._runtime_domain
-
-class RuntimedCodFunc:
-    """
-    The class of 'codomain-runtimed functions':
-        1. defined codomain (at runtime)
-        2. defined comp
-    It is a subclass of 'PlainFunc'
-    """
-    def __init__(self, func):
-        super().__init__(func)
-        self._runtime_codomain = runtime_codomain(func)
-
-    @property
-    def codomain(self):
-        return self._runtime_codomain
-
-class RuntimedFunc:
-    """
-    The class of 'runtimed functions':
-        1. defined domain and codomain (at runtime)
-        2. safe comp (checked at runtime)
-    It is a subclass of:
-        1. 'DomRuntimedFunc'
-        2. 'CodRuntimedFunc'
-    """
-    def __init__(self, func):
-        RuntimedDomFunc.__init__(self, func)
-        RuntimedCodFunc.__init__(self, func)
-
-    def __mul__(self, other):
-        if not isinstance(other, RuntimedFunc):
-            raise TypeError(f"'{other}' is not a valid runtimed function.")
-
-        comp_func = runtime_comp(self, other)
-        return RuntimedFunc(comp_func)
-
-
 # -------------------------
 #     Hinted Functions
 # -------------------------
@@ -152,7 +98,7 @@ class HintedFunc(HintedDomFunc, HintedCodFunc):
 # ---------------------------
 #       Typed Functions
 # ---------------------------
-class TypedDomFunc(HintedDomFunc, RuntimedDomFunc):
+class TypedDomFunc(HintedDomFunc):
     """
     The class of 'domain-typed functions':
         1. defined and checked domain
@@ -164,18 +110,23 @@ class TypedDomFunc(HintedDomFunc, RuntimedDomFunc):
     def __init__(self, func):
         HintedDomFunc.__init__(self, func)
         RuntimedDomFunc.__init__(self, func)
-        check_domain(func)
+        self.func = func
+        self.expected_domain = hinted_domain(func)
+        self.runtime_check_domainer = runtime_domain(func)
+        self.param_names = list(inspect.signature(func).parameters.keys())
+
+    def __call__(self, *args, **kwargs):
+        actual_domain = self.runtime_check_domainer(*args)
+        expected_types = getattr(self.expected_domain, '_types', [self.expected_domain])
+        actual_types = getattr(actual_domain, '_types', [actual_domain])
+        check_domain(self.func, self.param_names, expected_types, actual_types)
+        return super().__call__(*args, **kwargs)
 
     @property
     def domain(self):
-        return self._hinted_domain
+        return self.expected_domain
 
-    def __call__(self, *args, **kwargs):
-        check_domain(self.func)
-        return super().__call__(*args, **kwargs)
-
-
-class TypedCodFunc(HintedCodFunc, RuntimedCodFunc):
+class TypedCodFunc(HintedCodFunc):
     """
     The class of 'codomain-typed functions':
         1. defined and checked codomain
@@ -199,7 +150,7 @@ class TypedCodFunc(HintedCodFunc, RuntimedCodFunc):
         return result
 
 
-class TypedFunc(TypedDomFunc, TypedCodFunc, RuntimedFunc, HintedFunc):
+class TypedFunc(TypedDomFunc, TypedCodFunc, HintedFunc):
     """
     The class of 'typed functions':
         1. have type hints
