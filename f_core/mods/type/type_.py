@@ -4,13 +4,12 @@ from f import f
 from f_core.mods.type.helper_ import (
         runtime_domain,
         runtime_codomain,
-        runtime_comp,
+        is_domain_hinted,
+        is_codomain_hinted,
         hinted_domain,
         hinted_codomain,
-        hinted_comp,
         check_domain,
-        check_codomain,
-        typed_comp
+        check_codomain
 )
 
 # -----------------------------
@@ -26,6 +25,7 @@ class PlainFunc:
         if not callable(func):
             raise TypeError(f"'{func}' is not callable.")
         self.func = func
+        self.__name__ = func.__name__
 
     def __call__(self, *args, **kwargs):
         return self.func(*args, **kwargs)
@@ -49,8 +49,14 @@ class HintedDomFunc(PlainFunc):
     It is a subclass of 'PlainFunc'
     """
     def __init__(self, func):
+        is_domain_hinted(func)
         super().__init__(func)
         self._hinted_domain = hinted_domain(func)
+        self.__name__ = func.__name__
+
+    def __call__(self, *args, **kwargs):
+        is_domain_hinted(self.func)
+        return super().__call__(*args, **kwargs)
 
     @property
     def domain(self):
@@ -65,8 +71,14 @@ class HintedCodFunc(PlainFunc):
     It is a subclass of 'PlainFunc'
     """
     def __init__(self, func):
+        is_codomain_hinted(func)
         super().__init__(func)
         self._hinted_codomain = hinted_codomain(func)
+        self.__name__ = func.__name__
+
+    def __call__(self, *args, **kwargs):
+        is_codomain_hinted(self.func)
+        return super().__call__(*args, **kwargs)
 
     @property
     def codomain(self):
@@ -84,14 +96,22 @@ class HintedFunc(HintedDomFunc, HintedCodFunc):
         2. 'HintedCodFunc'
     """
     def __init__(self, func):
+        is_domain_hinted(func)
+        is_codomain_hinted(func)
         HintedDomFunc.__init__(self, func)
         HintedCodFunc.__init__(self, func)
+        self.__name__ = func.__name__
+
+    def __call__(self, *args, **kwargs):
+        is_domain_hinted(self.func)
+        is_codomain_hinted(self.func)
+        return super().__call__(*args, **kwargs)
 
     def __mul__(self, other):
         if not isinstance(other, HintedFunc):
             raise TypeError(f"'{other}' is not a valid hinted function.")
 
-        comp_func = hinted_comp(self, other)
+        comp_func = safe_comp(self, other)
         return HintedFunc(comp_func)
 
 
@@ -105,26 +125,27 @@ class TypedDomFunc(HintedDomFunc):
         2. defined comp
     It is a subclass of:
         1. 'HintedDomFunc'
-        2. 'RuntimedDomFunc'
     """
     def __init__(self, func):
+        is_domain_hinted(func)
         HintedDomFunc.__init__(self, func)
-        RuntimedDomFunc.__init__(self, func)
         self.func = func
-        self.expected_domain = hinted_domain(func)
+        self.hinted_domain = hinted_domain(func)
         self.runtime_check_domainer = runtime_domain(func)
         self.param_names = list(inspect.signature(func).parameters.keys())
+        self.__name__ = func.__name__
 
     def __call__(self, *args, **kwargs):
+        is_domain_hinted(self.func)
         actual_domain = self.runtime_check_domainer(*args)
-        expected_types = getattr(self.expected_domain, '_types', [self.expected_domain])
+        expected_types = getattr(self.hinted_domain, '_types', [self.hinted_domain])
         actual_types = getattr(actual_domain, '_types', [actual_domain])
         check_domain(self.func, self.param_names, expected_types, actual_types)
         return super().__call__(*args, **kwargs)
 
     @property
     def domain(self):
-        return self.expected_domain
+        return self.hinted_domain
 
 class TypedCodFunc(HintedCodFunc):
     """
@@ -133,54 +154,82 @@ class TypedCodFunc(HintedCodFunc):
         2. defined comp
     It is a subclass of:
         1. 'CodHintedFunc'
-        2. 'CodRuntimedFunc'
     """
     def __init__(self, func):
-        HintedCodFunc.__init__(self, func)
-        RuntimedCodFunc.__init__(self, func)
-        check_codomain(func)
-
-    @property
-    def codomain(self):
-        return self._hinted_codomain
+        is_codomain_hinted(func)
+        super().__init__(func)
+        self.hinted_codomain = hinted_codomain(func)
+        check_codomain(func, self.hinted_codomain, runtime_codomain(func))
+        self.__name__ = func.__name__
 
     def __call__(self, *args, **kwargs):
+        is_codomain_hinted(self.func)
         result = super().__call__(*args, **kwargs)
-        check_codomain(self.func)
+        actual_codomain = type(result)
+        check_codomain(self.func, self._hinted_codomain, actual_codomain)
         return result
 
+        @property
+        def codomain(self):
+            return self.hinted_codomain
 
-class TypedFunc(TypedDomFunc, TypedCodFunc, HintedFunc):
+
+class TypedFunc(TypedDomFunc, TypedCodFunc):
     """
     The class of 'typed functions':
         1. have type hints
         2. type hints are checked at runtime
-        3. defined domain and codomain (based on type hints)
-        4. safe comp (based on type hints)
+        3. defined domain and codomain based on type hints
+        4. safe composition (based on type hints)
     It is a subclass of:
         1. 'TypedDomFunc'
         2. 'TypedCodFunc'
-        3. 'RuntimedFunc'
-        4. 'HintedFunc'
+        3. 'HintedFunc'
     """
     def __init__(self, func):
         if not callable(func):
-            raise TypeError(f"'{func}' is not a function.")
-        super().__init__(func)
+            raise TypeError(f"'{func}' is not callable.")
+        is_domain_hinted(func)
+        is_codomain_hinted(func)
+        TypedDomFunc.__init__(self, func)
+        TypedCodFunc.__init__(self, func)
+        self.__name__ = func.__name__
 
     def __call__(self, *args, **kwargs):
-        check_domain(self.func)
-        try:
-            result = self.func(*args, **kwargs)
-        except Exception as e:
-            raise TypeError(f"Function '{self.func.__name__}' raised an error: {e}")
-        check_codomain(self.func)
-
+        is_domain_hinted(self.func)
+        is_codomain_hinted(self.func)
+        result = TypedDomFunc.__call__(self, *args, **kwargs)
+        actual_codomain = type(result)
+        check_codomain(self.func, self._hinted_codomain, actual_codomain)
         return result
 
     def __mul__(self, other):
         if not isinstance(other, TypedFunc):
             raise TypeError(f"'{other}' is not a valid typed function.")
 
-        comp_func = typed_comp(self, other)
-        return TypedFunc(comp_func)
+        def safe_comp(g, f):
+            f_codomain = hinted_codomain(f.func)
+            g_domain = hinted_domain(g.func)
+
+            if not issubclass(f_codomain, g_domain):
+                raise TypeError(
+                    f"Hinted codomain '{f_codomain.__name__}' of '{f.__name__}' "
+                    f"does not match hinted domain '{g_domain.__name__}' of '{g.__name__}'."
+                )
+            
+            def comp(*args: f.hinted_domain) -> g.hinted_codomain:
+                # Ensure that argument unpacking occurs correctly
+                return g.func(f.func(*args))
+            
+            # Wrap and return the composed function as a TypedFunc
+            return TypedFunc(comp)
+
+        return safe_comp(self, other) 
+
+    @property
+    def domain(self):
+        return self._hinted_domain
+
+    @property
+    def codomain(self):
+        return self._hinted_codomain

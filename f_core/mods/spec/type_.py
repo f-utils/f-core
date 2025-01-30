@@ -1,4 +1,5 @@
 from f import f
+from f_core.mods.type.op_ import *
 
 # define 'attr' spec
 f.s.i(
@@ -23,7 +24,7 @@ f.ds.i(
 f.ds.e(
     'coprod_',
     f.t.E().keys(),
-    Builder.coprod_type_
+    coprod_type_
 )
 
 # define 'prod' dspec
@@ -36,7 +37,7 @@ f.ds.i(
 f.ds.e(
     'prod_',
     f.t.E().keys(),
-    Builder.prod_type_
+    prod_type_
 )
 
 # define 'unordered prod' dspec
@@ -49,21 +50,21 @@ f.ds.i(
 f.ds.e(
     'unprod_',
     f.t.E().keys(),
-    Builder.unprod_type_
+    unprod_type_
 )
 
-# define 'func' dspec
-f.ds.i(
-    'func_',
-    'the function entity of entities',
-    lambda *args, **kwargs: 'Function entity not defined for the variable types.'
-)
+# # define 'func' dspec
+# f.ds.i(
+#     'func_',
+#     'the function entity of entities',
+#     lambda *args, **kwargs: 'Function entity not defined for the variable types.'
+# )
 
-f.ds.e(
-    'func_',
-    f.t.E().keys(),
-    Builder.func_type_
-)
+# f.ds.e(
+#     'func_',
+#     f.t.E().keys(),
+#     func_type_
+# )
 
 # define 'tfunc' dspec
 f.ds.i(
@@ -75,7 +76,7 @@ f.ds.i(
 f.ds.e(
     'tfunc_',
     f.t.E().keys(),
-    Builder.tfunc_type_
+    tfunc_type_
 )
 
 # define sub dspec
