@@ -5,13 +5,12 @@ from f_core.mods.spec.type_ import *
 # set primitive types
 class Types:
     pfunc = PlainFunc
+    hdfunc = HintedDomFunc
+    hcfunc = HintedCodFunc
     hfunc = HintedFunc
-    rfunc = RuntimedFunc
+    tdfunc = TypedDomFunc
+    tcfunc = TypedCodFunc
     tfunc = TypedFunc
-    pf = pfunc
-    hf = hfunc
-    rf = rfunc
-    tf = tfunc
 
 # set primitive modads
 class Monads:

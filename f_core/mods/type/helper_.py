@@ -3,6 +3,7 @@ from typing import get_type_hints
 from f_core.mods.type.op_ import prod_type_
 
 
+
 def runtime_domain(func):
     def wrapper(*args, **kwargs):
         types_at_runtime = tuple(type(arg) for arg in args)
@@ -15,6 +16,24 @@ def runtime_codomain(func):
     if return_annotation is not inspect.Signature.empty:
         return return_annotation
     return type(None)
+
+def is_domain_hinted(func):
+    type_hints = get_type_hints(func)
+    param_hints = {param: type_hints.get(param) for param in inspect.signature(func).parameters}
+    non_hinted_params = [param for param, hint in param_hints.items() if hint is None]
+    if non_hinted_params:
+        raise TypeError(
+            f"Function '{func.__name__}' must have type hints for all parameters."
+            f"\n\t --> Missing hints: '{', '.join(non_hinted_params)}'."
+        )
+    return True
+
+def is_codomain_hinted(func):
+    """Check if the function has a type hint for its return value and report if missing."""
+    type_hints = get_type_hints(func)
+    if 'return' not in type_hints or type_hints['return'] is None:
+        raise TypeError(f"Function '{func.__name__}' must have a return type hint.")
+    return True
 
 def hinted_domain(func):
     type_hints = get_type_hints(func)
@@ -33,38 +52,26 @@ def hinted_codomain(func):
         return type_hints['return']
     return type(None)
 
-def check_domain(func, param_names, expected_types, actual_types):
+def check_domain(func, param_names, expected_domain, actual_domain):
     mismatches = [
-        f"\n   - '{name}': should be '{expected.__name__}', but got '{actual.__name__}'"
-        for name, expected, actual in zip(param_names, expected_types, actual_types)
+        f"\n\t --> '{name}': should be '{expected.__name__}', but got '{actual.__name__}'"
+        for name, expected, actual in zip(param_names, expected_domain, actual_domain)
         if expected != actual
     ]
     if mismatches:
         mismatch_str = "".join(mismatches)+"."
         raise TypeError(f"Domain mismatch in func '{func.__name__}': {mismatch_str}")
 
-def check_codomain(func):
-    runtime_cod = runtime_codomain(func)
-    hinted_cod = hinted_codomain(func)
-
-    if runtime_cod != hinted_cod:
+def check_codomain(func, expected_codomain, actual_codomain):
+    """
+    Compare the expected and actual codomain types. If there's a mismatch,
+    raise a TypeError with a detailed message.
+    """
+    if not issubclass(actual_codomain, expected_codomain):
         raise TypeError(
-            f"Function '{func.__name__}': Runtime codomain '{runtime_cod.__name__}' does not match hinted codomain '{hinted_cod.__name__}'."
+            f"Codomain mismatch in func '{func.__name__}': expected '{expected_codomain.__name__}', "
+            f" got '{actual_codomain.__name__}'."
         )
-    return True
 
-def hinted_comp(f, g):
-    if not issubclass(hinted_codomain(f.func), hinted_domain(g.func)):
-        raise TypeError(f"Hinted codomain '{hinted_codomain(f.func).__name__}' of '{f.__name__}' does not match hinted domain '{hinted_domain(g.func).__name__}' of '{g.__name__}'.")
-    return lambda *args, **kwargs: g.func(f.func(*args, **kwargs))
 
-def runtime_comp(f, g):
-    if not issubclass(runtime_codomain(f.func), runtime_domain(g.func)):
-        raise TypeError(f"Runtime codomain '{runtime_codomain(f.func).__name__}' of '{f.__name__}' does not match runtime domain '{runtime_domain(g.func).__name__}' of '{g.__name__}'.")
-    return lambda *args, **kwargs: g.func(f.func(*args, **kwargs))
-
-def typed_comp(f, g):
-    if not issubclass(f.codomain, g.domain):
-        raise TypeError(f"Typed codomain of 'f' does not match typed domain of 'g'.")
-    return lambda *args, **kwargs: g.func(f.func(*args, **kwargs))
 
