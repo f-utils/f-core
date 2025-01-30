@@ -1,15 +1,33 @@
-from f_core.mods.type_ import TypedFunc
-from f_core.mods.type_ import Specs
+from f import f
+from f_core.mods.type.type_ import *
+from f_core.mods.spec.type_ import *
 
 # set primitive types
 class Types:
+    pfunc = PlainFunc
+    hfunc = HintedFunc
+    rfunc = RuntimedFunc
     tfunc = TypedFunc
+    pf = pfunc
+    hf = hfunc
+    rf = rfunc
     tf = tfunc
-t = Types
+
+# set primitive modads
+class Monads:
+    pass
 
 # set primitive specs
-prod_   = f.ds('prod_')
-coprod_ = f.ds('coprod_')
-unprod_ = f.ds('unprod_')
-func_   = f.ds('func_')
-tfunc_  = f.ds('tfunc_')
+class Specs:
+    prod_   = f.ds('prod_')
+    coprod_ = f.ds('coprod_')
+    unprod_ = f.ds('unprod_')
+    rdfunc_ = f.ds('rdfunc_')
+    rcfunc_ = f.ds('rcfunc_')
+    rfunc_  = f.ds('rfunc_')
+    hdfunc_ = f.ds('hdfunc_')
+    hcfunc_ = f.ds('hcfunc_')
+    hfunc_  = f.ds('hfunc_')
+    tdfunc_ = f.ds('tdfunc_')
+    tcfunc_ = f.ds('tcfunc_')
+    tfunc_  = f.ds('tfunc_')
