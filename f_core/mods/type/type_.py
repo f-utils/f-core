@@ -1,7 +1,8 @@
 import inspect
 from typing import get_type_hints
 from f import f
-from f_core.mods.utils import flat_, func_instance_
+from f_core.mods.type.op_ import prod_type_
+from f_core.mods.type.helper_ import flat_, func_instance_
 
 # TODO
 class Func:
@@ -129,7 +130,7 @@ class TypedFunc:
         type_hints = get_type_hints(self.func)
         domain_hints = tuple(type_hints.values())[:-1]
         if domain_hints:
-            return Builder.prod_type_(*domain_hints)
+            return prod_type_(*domain_hints)
         return type(None)
 
     def get_codomain(self):
