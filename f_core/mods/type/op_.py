@@ -442,3 +442,35 @@ def tfunc_type_(*domain_types, cod=None):
         f" cod={{{', '.join(t.__name__ for t in flat_codomain_types)}}})"
     )
     return type(class_name, (_tfunc,), {})
+
+def sub_type_(parent, *funcs):
+    """
+    Build the subtype 'sub_type(X, *funcs)' of a 'parent' type such that:
+    1. 'x' is an object only if  Each function in 'funcs' is a boolean function
+       with the domain 'prod_([parent])'
+    3. The subtype includes objects from 'parent' for
+       which all functions return True
+    """
+    if not isinstance(parent, type):
+        raise TypeError("Argument 'parent' must be a type.")
+
+    for f in funcs:
+        if not callable(f):
+            raise TypeError("Each function in 'funcs' must be callable.")
+
+        domain_hints = hinted_domain(f)
+        if any(hint != parent for hint in domain_hints):
+            raise TypeError("Each function in 'funcs' must have a domain of 'prod_([parent])'.")
+
+        if hinted_codomain(f) is not bool:
+            raise TypeError(f"Each function in 'funcs' must be boolean: '{f.__name}' is not.")
+
+    class _sub(parent):
+        def __new__(cls, *args, **kwargs):
+            instance = super(_sub, cls).__new__(cls, *args, **kwargs)
+            if not all(f(instance, *args, **kwargs) for f in funcs):
+                raise ValueError(f"Object does not satisfy all conditions in {funcs}.")
+            return instance
+
+    sub_class_name = f"sub_({parent.__name__})"
+    return type(sub_class_name, (parent,), {})
