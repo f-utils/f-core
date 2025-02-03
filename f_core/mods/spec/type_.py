@@ -53,18 +53,45 @@ f.ds.e(
     unprod_type_
 )
 
-# # define 'func' dspec
-# f.ds.i(
-#     'func_',
-#     'the function entity of entities',
-#     lambda *args, **kwargs: 'Function entity not defined for the variable types.'
-# )
+# define 'set prod' dspec
+f.ds.i(
+    'set_',
+    'the set product of entities',
+    lambda *args, **kwargs: 'Set product not defined for the variable types.'
+)
 
-# f.ds.e(
-#     'func_',
-#     f.t.E().keys(),
-#     func_type_
-# )
+f.ds.e(
+    'set_',
+    f.t.E().keys(),
+    set_type_
+)
+
+# define 'dict prod' dspec
+f.ds.i(
+    'dict_',
+    'the dict product of entities',
+    lambda *args, **kwargs: 'Dict product not defined for the variable types.'
+)
+
+f.ds.e(
+    'dict_',
+    f.t.E().keys(),
+    set_type_
+)
+
+
+# define 'hfunc' dspec
+f.ds.i(
+    'hfunc_',
+    'the hinted function entity of entities',
+    lambda *args, **kwargs: 'Hinted function entity not defined for the variable types.'
+)
+
+f.ds.e(
+    'hfunc_',
+    f.t.E().keys(),
+    hfunc_type_
+)
 
 # define 'tfunc' dspec
 f.ds.i(
@@ -79,9 +106,16 @@ f.ds.e(
     tfunc_type_
 )
 
-# define sub dspec
-f.s.i(
-    'sub_',
-    'build a subobject from a given object',
-    lambda *args, **kwargs: 'Subobject not defined for the variable types.'
+# define 'bfunc' dspec
+f.ds.i(
+    'bfunc_',
+    'the boolean function entity of entities',
+    lambda *args, **kwargs: 'Boolean function entity not defined for the variable types.'
 )
+
+f.ds.e(
+    'bfunc_',
+    f.t.E().keys(),
+    bfunc_type_
+)
+
