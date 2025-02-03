@@ -417,24 +417,24 @@ def sub_type_(parent, *funcs):
     if not isinstance(parent, type):
         raise TypeError("Argument 'parent' must be a type.")
 
+    def is_valid_func(func):
+        actual_func = func.func if hasattr(func, 'func') else func
+        return (callable(actual_func) and
+                all(hint == parent for hint in hinted_domain(actual_func)) and
+                hinted_codomain(actual_func) is bool)
+
     for f in funcs:
-        if not callable(f):
-            raise TypeError("Each function in 'funcs' must be callable.")
+        if not is_valid_func(f):
+            raise TypeError("Each function in 'funcs' must be a callable boolean function with domain 'prod_([parent])'.")
 
-        domain_hints = hinted_domain(f)
+    class _SubType(parent):
+        def __init__(self, value):
+            if not all(func.func(value) for func in funcs):
+                raise ValueError("Object does not satisfy all conditions in the given funcs.")
+            super().__init__()
 
-    if any(hint != parent for hint in domain_hints):
-        raise TypeError("Each function in 'funcs' must have a domain of 'prod_([parent])'.")
-
-        if hinted_codomain(f) is not bool:
-            raise TypeError(f"Each function in 'funcs' must be boolean: '{f.__name}' is not.")
-
-    class _sub(parent):
-        def __new__(cls, *args, **kwargs):
-            instance = super(_sub, cls).__new__(cls, *args, **kwargs)
-            if not all(f(instance, *args, **kwargs) for f in funcs):
-                raise ValueError(f"Object does not satisfy all conditions in {funcs}.")
-            return instance
+        def __instancecheck__(cls, instance):
+            return isinstance(instance, parent) and all(func.func(instance) for func in funcs)
 
     sub_class_name = f"sub_({parent.__name__})"
-    return type(sub_class_name, (parent,), {})
+    return type(sub_class_name, (_SubType,), {})

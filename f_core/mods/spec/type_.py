@@ -1,5 +1,29 @@
 from f import f
 from f_core.mods.type.op_ import *
+from f_core.mods.type.type_ import (
+    PlainFunc,
+    HintedFunc,
+    TypedFunc,
+    BooleanFunc
+)
+
+# turn basic func type classes as accessible types
+f.t.i(
+    PlainFunc,
+    'The class of composable callable objects.'
+)
+f.t.i(
+    HintedFunc,
+    'The class of composable callable objects with type hints.'
+)
+f.t.i(
+    TypedFunc,
+    'The class of composable callable objects with type hints checked at runtimes.'
+)
+f.t.i(
+    BooleanFunc,
+    'The class of boolean typed functions.'
+)
 
 # define 'attr' spec
 f.s.i(
@@ -118,4 +142,18 @@ f.ds.e(
     f.t.E().keys(),
     bfunc_type_
 )
+
+# define 'sub' spec
+f.s.i(
+    'sub_',
+    'the subentity of entities',
+    lambda *args, **kwargs: 'Subentity not defined for the variable types.'
+)
+
+f.s.e(
+    'sub_',
+    (type, BooleanFunc),
+    sub_type_
+)
+
 
