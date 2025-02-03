@@ -383,7 +383,7 @@ def bfunc_type_(*domain_types):
 
     class_name = "bfunc_type_[" + (", ".join(t.__name__ for t in flat_types)) + "]"
 
-    class _BFuncMeta(type):
+    class _bfunc(type):
         def __instancecheck__(cls, instance):
             if not isinstance(instance, BooleanFunc):
                 return False
@@ -403,7 +403,7 @@ def bfunc_type_(*domain_types):
 
             return True
 
-    return _BFuncMeta(class_name, (), {})
+    return _bfunc(class_name, (), {})
 
 def sub_type_(parent, *funcs):
     """
@@ -426,7 +426,7 @@ def sub_type_(parent, *funcs):
         if not is_valid_func(f):
             raise TypeError("Each function in 'funcs' must be a callable boolean function with domain 'prod_([parent])'.")
 
-    class _SubType(parent):
+    class _sub(parent):
         def __init__(self, value):
             if not all(func.func(value) for func in funcs):
                 raise ValueError("Object does not satisfy all conditions in the given funcs.")
@@ -436,7 +436,7 @@ def sub_type_(parent, *funcs):
             return isinstance(instance, parent) and all(func.func(instance) for func in funcs)
 
     sub_class_name = f"sub_({parent.__name__})"
-    return type(sub_class_name, (_SubType,), {})
+    return type(sub_class_name, (_sub,), {})
 
 def compl_type_(parent, *subclasses):
     if not isinstance(parent, type):
@@ -461,14 +461,11 @@ def compl_type_(parent, *subclasses):
                         return super(ComplementType, cls).__new__(cls, value, *args, **kwargs)
             if mistake_values and mistake_subclasses:
                 raise TypeError(f"'{mistake_values}' is instance of the corresponding subtype '{mistake_subclasses}'")
-
-
         def __init__(self, value, *args, **kwargs):
             super().__init__()
 
         @classmethod
         def __instancecheck__(cls, instance):
-            # Ensure the 'instance' is a ComplementType and does not belong to any specified subclass
             return isinstance(instance, ComplementType) and not any(isinstance(instance.value, subclass) for subclass in subclasses) 
 
     return ComplementType
