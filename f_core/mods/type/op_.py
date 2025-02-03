@@ -405,7 +405,6 @@ def bfunc_type_(*domain_types):
 
     return _BFuncMeta(class_name, (), {})
 
-
 def sub_type_(parent, *funcs):
     """
     Build the subtype 'sub_type(X, *funcs)' of a 'parent' type such that:
@@ -438,3 +437,40 @@ def sub_type_(parent, *funcs):
 
     sub_class_name = f"sub_({parent.__name__})"
     return type(sub_class_name, (_SubType,), {})
+
+def compl_type_(parent, *subclasses):
+    if not isinstance(parent, type):
+        raise TypeError(f"'{parent}' is not a type.")
+    mistake_subclasses = []
+    for subclass in subclasses:
+        if not issubclass(subclass, parent):
+            mistake_subclasses.append(subclass)
+    if mistake_subclasses:
+        raise TypeError(f"'{missing_subclasses}' are not a subtypes of '{parent}'.")
+    class ComplementType(parent):
+        def __new__(cls, value, *args, **kwargs):
+            mistake_values = []
+            mistake_subclasses = []
+            for subclass in subclasses:
+                if callable(subclass):
+                    try:
+                        if subclass(value):
+                            mistake_subclasses.append(subclass.__name__)
+                            mistake_values.append(value)
+                    except:
+                        return super(ComplementType, cls).__new__(cls, value, *args, **kwargs)
+            if mistake_values and mistake_subclasses:
+                raise TypeError(f"'{mistake_values}' is instance of the corresponding subtype '{mistake_subclasses}'")
+
+
+        def __init__(self, value, *args, **kwargs):
+            super().__init__()
+
+        @classmethod
+        def __instancecheck__(cls, instance):
+            # Ensure the 'instance' is a ComplementType and does not belong to any specified subclass
+            return isinstance(instance, ComplementType) and not any(isinstance(instance.value, subclass) for subclass in subclasses) 
+
+    return ComplementType
+
+

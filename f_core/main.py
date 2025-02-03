@@ -33,3 +33,4 @@ class Specs:
     tfunc_  = f.ds('tfunc_')
     bfunc_  = f.ds('bfunc_')
     sub_    = f.s('sub_')
+    compl_  = f.s('compl_')

@@ -156,4 +156,18 @@ f.s.e(
     sub_type_
 )
 
+# define 'compl' dspec
+f.s.i(
+    'compl_',
+    'the completion entity by given subentities',
+    lambda *args, **kwargs: 'Completion not defined for the variable types.'
+)
+
+f.s.e(
+    'compl_',
+    (type, type),
+    compl_type_
+)
+
+
 
