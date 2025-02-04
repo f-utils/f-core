@@ -1,29 +1,6 @@
 from f import f
 from f_core.mods.type.op_ import *
-from f_core.mods.type.type_ import (
-    PlainFunc,
-    HintedFunc,
-    TypedFunc,
-    BooleanFunc
-)
-
-# turn basic func type classes as accessible types
-f.t.i(
-    PlainFunc,
-    'The class of composable callable objects.'
-)
-f.t.i(
-    HintedFunc,
-    'The class of composable callable objects with type hints.'
-)
-f.t.i(
-    TypedFunc,
-    'The class of composable callable objects with type hints checked at runtimes.'
-)
-f.t.i(
-    BooleanFunc,
-    'The class of boolean typed functions.'
-)
+from f_core.mods.type.main_ import *
 
 # define 'attr' spec
 f.s.i(

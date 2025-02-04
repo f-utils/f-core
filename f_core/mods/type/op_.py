@@ -1,3 +1,5 @@
+from f import f
+
 from f_core.mods.type.helper_ import (
     flat_,
     prod_,
@@ -5,7 +7,6 @@ from f_core.mods.type.helper_ import (
     hinted_codomain
 )
 from f_core.mods.type.type_ import (
-    PlainFunc,
     HintedDomFunc,
     HintedCodFunc,
     HintedFunc,
@@ -44,7 +45,6 @@ def coprod_type_(*types):
     else:
         class_name = f"coprod_({', '.join(t.__name__ for t in flat_types)})"
     coprod_ = _coprod(class_name, (), {})
-
     return coprod_
 
 def prod_type_(*types):
