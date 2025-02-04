@@ -18,6 +18,7 @@ from f_core.mods.type.type_ import (
 # ----------------------
 #    Type Operations
 # ----------------------
+
 def coprod_type_(*types):
     """
     Build the 'coproduct' of types:
@@ -469,5 +470,3 @@ def compl_type_(parent, *subclasses):
             return isinstance(instance, ComplementType) and not any(isinstance(instance.value, subclass) for subclass in subclasses) 
 
     return ComplementType
-
-

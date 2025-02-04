@@ -168,6 +168,3 @@ f.s.e(
     (type, type),
     compl_type_
 )
-
-
-

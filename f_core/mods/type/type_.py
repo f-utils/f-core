@@ -221,7 +221,6 @@ class TypedFunc(TypedDomFunc, TypedCodFunc):
                 return g.func(f.func(*args))
             return TypedFunc(comp)
         return safe_comp(self, other)
-
     @property
     def domain(self):
         return self._hinted_domain
@@ -229,7 +228,6 @@ class TypedFunc(TypedDomFunc, TypedCodFunc):
     @property
     def codomain(self):
         return self._hinted_codomain
-
 
 class BooleanFunc(TypedFunc):
     """
