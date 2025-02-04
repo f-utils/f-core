@@ -2,15 +2,16 @@ import inspect
 from typing import get_type_hints
 from f import f
 from f_core.mods.type.helper_ import (
-        runtime_domain,
-        runtime_codomain,
-        is_domain_hinted,
-        is_codomain_hinted,
-        hinted_domain,
-        hinted_codomain,
-        check_domain,
-        check_codomain
+    is_domain_hinted,
+    is_codomain_hinted,
+    hinted_domain,
+    hinted_codomain,
+    runtime_domain,
+    runtime_codomain,
+    check_domain,
+    check_codomain
 )
+
 
 # -----------------------------
 #       Plain Functions
@@ -216,16 +217,10 @@ class TypedFunc(TypedDomFunc, TypedCodFunc):
                     f"Hinted codomain '{f_codomain.__name__}' of '{f.__name__}' "
                     f"does not match hinted domain '{g_domain.__name__}' of '{g.__name__}'."
                 )
-            
             def comp(*args: f.hinted_domain) -> g.hinted_codomain:
-                # Ensure that argument unpacking occurs correctly
                 return g.func(f.func(*args))
-            
-            # Wrap and return the composed function as a TypedFunc
             return TypedFunc(comp)
-
-        return safe_comp(self, other) 
-
+        return safe_comp(self, other)
     @property
     def domain(self):
         return self._hinted_domain
@@ -233,3 +228,18 @@ class TypedFunc(TypedDomFunc, TypedCodFunc):
     @property
     def codomain(self):
         return self._hinted_codomain
+
+class BooleanFunc(TypedFunc):
+    """
+    The class of 'boolean functions':
+        1. are typed functions
+        2. its codomain is always 'bool'
+    """
+
+    def __init__(self, func):
+        super().__init__(func)
+        if hinted_codomain(self.func) is not bool:
+            raise TypeError(f"'{self.func.__name__}' does not have 'bool' as its return type.")
+
+    def __instancecheck__(self, instance):
+        return isinstance(instance, TypedFunc) and hinted_codomain(instance.func) == bool

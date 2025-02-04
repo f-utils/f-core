@@ -11,6 +11,7 @@ class Types:
     tdfunc = TypedDomFunc
     tcfunc = TypedCodFunc
     tfunc = TypedFunc
+    bfunc = BooleanFunc
 
 # set primitive modads
 class Monads:
@@ -30,3 +31,6 @@ class Specs:
     tdfunc_ = f.ds('tdfunc_')
     tcfunc_ = f.ds('tcfunc_')
     tfunc_  = f.ds('tfunc_')
+    bfunc_  = f.ds('bfunc_')
+    sub_    = f.s('sub_')
+    compl_  = f.s('compl_')
