@@ -12,7 +12,6 @@ from f_core.mods.type.helper_ import (
     check_codomain
 )
 
-
 # -----------------------------
 #       Plain Functions
 # -----------------------------
