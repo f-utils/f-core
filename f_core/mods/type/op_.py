@@ -20,6 +20,33 @@ from f_core.mods.type.type_ import (
 #    Type Operations
 # ----------------------
 
+def inter_type_(*types):
+    """
+    Build the 'intersection' of types:
+        > an object 'p' of the inter_(X, Y, ...)
+        > is an object of every 'X, Y, ...'
+    """
+    unique_types = list(set(types))
+    if len(unique_types) == 1:
+        return unique_types[0]
+    if len(unique_types) == 0:
+        return type(None)
+
+    if any(t.__module__ == 'builtins' for t in unique_types):
+        raise TypeError("Cannot create an intersection type with built-in types due to potential layout conflicts.")
+
+    class_name = f"inter_({', '.join(t.__name__ for t in types)})"
+
+    class _inter(*unique_types):
+        __name__ = class_name
+        def __instancecheck__(cls, instance):
+            return all(isinstance(instance, t) for t in unique_types)
+
+    _inter.__name__ = class_name
+
+    return _inter
+
+
 def coprod_type_(*types):
     """
     Build the 'coproduct' of types:

@@ -15,6 +15,20 @@ f.s.e(
     lambda x, y, z: setattr(x, y, z)
 )
 
+# define 'inter' dspec
+f.ds.i(
+    'inter_',
+    'the intersection of entities',
+    lambda *args, **kwargs: 'Intersection not defined for the variable types.'
+)
+
+f.ds.e(
+    'inter_',
+    Any.tuple(),
+    inter_type_
+)
+
+
 # define 'coprod' dspec
 f.ds.i(
     'coprod_',
@@ -24,7 +38,7 @@ f.ds.i(
 
 f.ds.e(
     'coprod_',
-    f.t.E().keys(),
+    Any.tuple(),
     coprod_type_
 )
 
@@ -37,7 +51,7 @@ f.ds.i(
 
 f.ds.e(
     'prod_',
-    f.t.E().keys(),
+    Any.tuple(),
     prod_type_
 )
 
@@ -50,7 +64,7 @@ f.ds.i(
 
 f.ds.e(
     'unprod_',
-    f.t.E().keys(),
+    Any.tuple(),
     unprod_type_
 )
 
@@ -63,7 +77,7 @@ f.ds.i(
 
 f.ds.e(
     'set_',
-    f.t.E().keys(),
+    Any.tuple(),
     set_type_
 )
 
@@ -76,7 +90,7 @@ f.ds.i(
 
 f.ds.e(
     'dict_',
-    f.t.E().keys(),
+    Any.tuple(),
     set_type_
 )
 
@@ -90,7 +104,7 @@ f.ds.i(
 
 f.ds.e(
     'hfunc_',
-    f.t.E().keys(),
+    Any.tuple(),
     hfunc_type_
 )
 
@@ -103,7 +117,7 @@ f.ds.i(
 
 f.ds.e(
     'tfunc_',
-    f.t.E().keys(),
+    Any.tuple(),
     tfunc_type_
 )
 
@@ -116,7 +130,7 @@ f.ds.i(
 
 f.ds.e(
     'bfunc_',
-    f.t.E().keys(),
+    Any.tuple(),
     bfunc_type_
 )
 
