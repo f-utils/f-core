@@ -1,19 +1,23 @@
-from collections.abc import Iterable, Container, Sequence
+from collections.abc import Iterable, Container, Sequence, Hashable, Callable, Sized
 from types import FunctionType, LambdaType
 import inspect
 from collections.abc import MutableSequence, MutableMapping, MutableSet
 
 class Is:
     aliases = {
-        'type':  ['t', 'class'],
-        'call':  ['callable', 'c'],
-        'func':  ['f', 'function'],
-        'lamb':  ['l'],
-        'cont':  ['container', 'C'],
-        'iter':  ['iterable', 'i'],
-        'seq':   ['sequence', 'sequencial', 's'],
-        'hash':  ['hashable', 'h'],
-        'dyn':   ['dynamic', 'd', 'mutable', 'm']
+        'type':       ['t'],
+        'call':       ['callable', 'c'],
+        'func':       ['f', 'function'],
+        'lamb':       ['l'],
+        'cont':       ['container', 'cnt'],
+        'sized':      ['sized', 'szd']
+        'iter':       ['iterable', 'i', 'it'],
+        'seq':        ['sequence', 'sequencial', 'sq'],
+        'hash':       ['hashable', 'h'],
+        'dyn':        ['dynamic', 'd', 'mutable', 'm'],
+        'empty':      ['e', 'initial'],
+        'singleton':  ['sg', 'terminal']
+        'null':       ['zero', 'n', 'z']
     }
 
     @staticmethod
@@ -31,6 +35,8 @@ class Is:
 
     @staticmethod
     def call(x):
+        if isinstance(x, type):
+            return issubclass(x, Callable)
         return callable(x)
 
     @staticmethod
@@ -43,23 +49,33 @@ class Is:
 
     @staticmethod
     def cont(x):
+        if isinstance(x, type):
+            return issubclass(x, Container)
         return isinstance(x, Container)
 
     @staticmethod
+    def sized(x):
+        if isinstance(x, type):
+            return issubclass(x, Sized)
+        return isinstance(x, Sized)
+
+    @staticmethod
     def iter(x):
+        if isinstance(x, type):
+            return issubclass(x, Iterable)
         return isinstance(x, Iterable)
 
     @staticmethod
     def seq(x):
+        if isinstance(x, type):
+            return issubclass(x, Sequence)
         return isinstance(x, Sequence)
 
     @staticmethod
     def hash(x):
-        try:
-            hash(x)
-            return True
-        except:
-            return False
+        if isinstance(x, type):
+            return issubclass(x, Hashable)
+        return isinstance(x, Hashable)
 
     @staticmethod
     def dyn(x):
@@ -73,6 +89,26 @@ class Is:
             return True
         if isinstance(x, (MutableSequence, MutableMapping, MutableSet)):
             return True
+        return False
+
+    @staticmethod
+    def empty(x):
+        if Is.sized(x) and len(x) == 0:
+            return True
+        return False
+
+    @staticmethod
+    def singleton(x):
+        if not isinstance(obj, (Sized, Container)):
+            return False
+        return len(x) == 1
+
+    @staticmethod
+    def null(x):
+        if isinstance(x, (int, float, complex)):
+            return x == 0
+        if hasattr(x, '__null__') and callable(x.__null__):
+            return x.__null__()
         return False
 
     for base_name, alias_list in aliases.items():
