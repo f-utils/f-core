@@ -1,5 +1,6 @@
 import inspect
 from typing import get_type_hints
+from types import FunctionType, LambdaType
 from f import f
 from f_core.mods.type.helper_ import (
     is_domain_hinted,
@@ -15,15 +16,15 @@ from f_core.mods.type.helper_ import (
 # -----------------------------
 #       Plain Functions
 # -----------------------------
-class PlainFunc:
+class PlainFunc(FunctionType, LambdaType):
     """
     The class of 'plain functions':
         1. objects are callable
         2. defined comp
     """
     def __init__(self, func):
-        if not callable(func):
-            raise TypeError(f"'{func}' is not callable.")
+        if type(func) is not FunctionType or is not LambdaType:
+            raise TypeError(f"'{func}' is not a function nor a lambda.")
         self.func = func
         self.__name__ = func.__name__
 

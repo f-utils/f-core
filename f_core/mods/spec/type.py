@@ -28,7 +28,6 @@ f.ds.e(
     inter_type_
 )
 
-
 # define 'coprod' dspec
 f.ds.i(
     'coprod_',
@@ -93,7 +92,6 @@ f.ds.e(
     Any.tuple(),
     set_type_
 )
-
 
 # define 'hfunc' dspec
 f.ds.i(

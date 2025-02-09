@@ -114,4 +114,4 @@ class Is:
     for base_name, alias_list in aliases.items():
         _func = locals()[base_name]
         for alias in alias_list:
-            locals()[alias] = _func
+            locals()[alias] = _func 

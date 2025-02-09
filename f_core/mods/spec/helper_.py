@@ -1,7 +1,17 @@
-from f_core.mods.type.main_ import Any
+def is_subseq(x, y):
+    if len(x) == 0:
+        return True
+    if len(x) > len(y):
+        return False
+    return any(y[i:i+len(x)] == x for i in range(len(y) - len(x) + 1))
 
-def subclass_(x: type, y: type) -> bool:
-    return issubclass(x, y)
+def is_subsized(x, y):
+    return len(x) < len(y)
 
-def instance_(x: Any(), y: type) -> bool:
-    return isinstance(x, y)
+def is_subcont(x, y):
+    return all(item in y for item in x)
+
+def is_subiter(x, y):
+
+
+
