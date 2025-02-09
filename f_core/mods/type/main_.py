@@ -28,6 +28,8 @@ class Any:
     @staticmethod
     def get():
         return coprod_type_(*f.t.E().keys())
+    def tuple():
+        return f.t.E().keys()
 
 # include the primitive func types
 f.t.i(
@@ -55,5 +57,3 @@ f.t.i(
     Any,
     'The type of anything.'
 )
-
-
