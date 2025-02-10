@@ -1,6 +1,6 @@
 from f import f
 from f_core.mods.type.type_ import *
-from f_core.mods.type.op_ import (
+from f_core.mods.op.prod_ import (
     coprod_type_
 )
 

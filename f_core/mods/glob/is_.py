@@ -2,6 +2,7 @@ from collections.abc import Iterable, Container, Sequence, Hashable, Callable, S
 from types import FunctionType, LambdaType
 import inspect
 from collections.abc import MutableSequence, MutableMapping, MutableSet
+from f_core.mods.glob.sub_ import Sub
 
 class Is:
     aliases = {
@@ -10,13 +11,13 @@ class Is:
         'func':       ['f', 'function'],
         'lamb':       ['l'],
         'cont':       ['container', 'cnt'],
-        'sized':      ['sized', 'szd']
+        'sized':      ['sized', 'szd'],
         'iter':       ['iterable', 'i', 'it'],
         'seq':        ['sequence', 'sequencial', 'sq'],
         'hash':       ['hashable', 'h'],
         'dyn':        ['dynamic', 'd', 'mutable', 'm'],
         'empty':      ['e', 'initial'],
-        'singleton':  ['sg', 'terminal']
+        'singleton':  ['sg', 'terminal'],
         'null':       ['zero', 'n', 'z']
     }
 
@@ -114,4 +115,7 @@ class Is:
     for base_name, alias_list in aliases.items():
         _func = locals()[base_name]
         for alias in alias_list:
-            locals()[alias] = _func 
+            locals()[alias] = _func
+
+    Sub = Sub
+    sub = Sub
