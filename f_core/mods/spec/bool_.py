@@ -1,6 +1,6 @@
 from f import f
-from f_core.mods.type.main_ import *
-from f_core.mods.glob_ import Is as is_
+from f_core.mods.type.main_ import BooleanFunc, Any
+from f_core.mods.glob.is_ import Is as is_
 from f_core.mods.spec.helper_ import *
 
 # add 'belongs' spectra
@@ -22,41 +22,21 @@ f.s.e(
     lambda x,y: isinstance(x, y)
 )
 
-
-# add 'less_than' spectra
-
+# add 'not' spectra
 f.s.i(
-    'less_than_',
-    'Check if something is less than something else',
-    lambda *args, **kwargs: 'The provided types are not acceptable for the less than operation.'
-)
-
-
-f.s.i(
-    'less_than_',
-    'Check if something is less than something else',
-    lambda *args, **kwargs: 'The provided types are not acceptable for the less than operation.'
+    'not_',
+    'Negate something.',
+    lambda *args, **kwargs: 'The provided types cannot be negated.'
 )
 
 f.s.e(
-    'less_than_',
-    (type, type),
-    lambda x,y: issubclass(x, y)
+    'not_',
+    (bool, ),
+    lambda x: not x
 )
 
-for t in (t in Any.tuple(t) if is_.seq(t)):
-    f.s.e(
-        'less_than_',
-        (, type),
-        lambda x,y: issubclass(x, y)
-    )
-
-
-# add 'has_' spectra
-
-f.s.i(
-    'has_',
-    'Check if something has something else'
+f.s.e(
+    'not_',
+    (BooleanFunc, ),
+    n_
 )
-
-
