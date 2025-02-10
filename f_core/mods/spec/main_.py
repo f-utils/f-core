@@ -10,3 +10,4 @@ class Specs:
     compl   = f.s('compl_')
     belongs = f.s('belongs_')
     bl      = belongs
+    n       = f.s('not_')

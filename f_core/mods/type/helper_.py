@@ -94,13 +94,14 @@ def hinted_codomain(func):
     return type_hints.get('return', type(None))
 
 def check_domain(func, param_names, expected_domain, actual_domain):
-    mismatches = [
-        f"\n\t --> '{name}': should be '{expected.__name__}', but got '{actual.__name__}'"
-        for name, expected, actual in zip(param_names, expected_domain, actual_domain)
-        if expected != actual
-    ]
+    mismatches = []
+    for name, expected, actual in zip(param_names, expected_domain, actual_domain):
+        expected_name = getattr(expected, '__name__', repr(expected))
+        actual_name = getattr(actual, '__name__', repr(actual))
+        if expected != actual:
+            mismatches.append(f"\n\t --> '{name}': should be '{expected_name}', but got '{actual_name}'")
     if mismatches:
-        mismatch_str = "".join(mismatches)+"."
+        mismatch_str = "".join(mismatches) + "."
         raise TypeError(f"Domain mismatch in func '{func.__name__}': {mismatch_str}")
 
 def check_codomain(func, expected_codomain, actual_codomain):

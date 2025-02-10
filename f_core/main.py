@@ -8,12 +8,17 @@ from f_core.mods.glob.main_ import *
 class Types(FuncTypes):
     Any = Any
     any = Any
-    pass
 
 class Globals:
     Is = Is
     is_ = Is
     i = is_
     Sub = Sub
-    sub_ = Sub
-    s = sub_
+    sub = Sub
+    s = sub
+
+class Ops(Ops):
+    pass
+
+class Specs(Specs):
+    pass
