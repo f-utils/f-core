@@ -1,6 +1,7 @@
 import inspect
 from typing import get_type_hints
 from f import f
+from types import FunctionType, LambdaType
 from f_core.mods.type.helper_ import (
     is_domain_hinted,
     is_codomain_hinted,
@@ -137,9 +138,8 @@ class TypedDomFunc(HintedDomFunc):
 
     def __call__(self, *args, **kwargs):
         is_domain_hinted(self.func)
-        actual_domain = self.runtime_check_domainer(*args)
-        expected_types = getattr(self.hinted_domain, '_types', [self.hinted_domain])
-        actual_types = getattr(actual_domain, '_types', [actual_domain])
+        expected_types = self.hinted_domain
+        actual_types = tuple(map(type, args))
         check_domain(self.func, self.param_names, expected_types, actual_types)
         return super().__call__(*args, **kwargs)
 

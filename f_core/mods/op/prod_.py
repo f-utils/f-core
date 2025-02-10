@@ -1,4 +1,4 @@
-from f_core.mods.type.helper_ import flat_
+from f_core.mods.type.helper_ import flat_, prod_
 
 def coprod_type_(*types):
     """

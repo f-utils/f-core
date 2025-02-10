@@ -1,6 +1,6 @@
 from f_core.mods.op.op_ import *
 
-class Op:
+class Ops:
     inter  = f.op('inter_')
     prod   = f.op('prod_')
     coprod = f.op('coprod_')
@@ -12,5 +12,3 @@ class Op:
     bfunc  = f.op('bfunc_')
     sub    = f.op('sub_')
     compl  = f.op('compl_')
-
-
