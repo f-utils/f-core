@@ -9,18 +9,24 @@ class Is:
         'type':  ['t'],
         'call':  ['callable', 'c'],
         'func':  ['f', 'function'],
-        'lamb':  ['l'],
+        'lamb':  ['L'],
         'cont':  ['container', 'cnt'],
-        'sized': ['sized', 'szd'],
+        'sized': ['size', 'szd'],
         'iter':  ['iterable', 'i', 'it'],
         'seq':   ['sequence', 'sequencial', 'sq'],
         'hash':  ['hashable', 'h'],
-        'dyn':   ['dynamic', 'd', 'mutable', 'mut'],
+        'dyn':   ['dynamic', 'mutable', 'mut'],
         'empty': ['e'],
         'sing':  ['sg', 'singleton'],
         'null':  ['zero', 'n', 'z'],
         'map':   ['m', 'mapping'],
-        'app':   ['a', 'append', 'appendable']
+        'app':   ['a', 'append', 'appendable'],
+        'int':   ['integer'],
+        'float': ['floating'],
+        'list':  ['l', 'lst'],
+        'tuple': ['tpl'],
+        'dict':  ['d', 'dictionary'],
+        'set':   ['s']
     }
 
     @staticmethod
@@ -126,6 +132,30 @@ class Is:
             return x == 0
         if isinstance(x, struc.Nullable):
             return x.__null__
+
+    @staticmethod
+    def int(x):
+        return isinstance(x, int)
+
+    @staticmethod
+    def float(x):
+        return isinstance(x, float)
+
+    @staticmethod
+    def tuple(x):
+        return isinstance(x, tuple)
+
+    @staticmethod
+    def list(x):
+        return isinstance(x, list)
+
+    @staticmethod
+    def dict(x):
+        return isinstance(x, dict)
+
+    @staticmethod
+    def set(x):
+        return isinstance(x, set)
 
     for base_name, alias_list in aliases.items():
         _func = locals()[base_name]
