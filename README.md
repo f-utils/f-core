@@ -6,44 +6,69 @@
 | $$_/|______/| $$      | $$  \ $$| $$  \__/| $$$$$$$$
 | $$          | $$      | $$  | $$| $$      | $$_____/
 | $$          |  $$$$$$$|  $$$$$$/| $$      |  $$$$$$$
-|__/           \_______/ \______/ |__/       \_______/
-                                                     
+|__/           \_______/ \______/ |__/       \_______/                                                  
 ```
 
 # About
 
-`f-core` is the core lib of `f-utils`. It provides the primitive generic functions, to be called directly, without a namespace.
+`f-core` is the core lib of `f-utils`. It provides the primitive accessible types, type operations and spectra.
 
-# Modules
+# Structure
 
 ```
-mod            description
----------------------------------------------
-ansi           definition of ansi colors
-logs           definition and configuration of logs
-op             generalized basic operations
-cmd            basic python commands
-date           functions related to date and time
-hash           hashable types based functions
-iter           iterable-based functions
-var            tests related to variables
-func           function-based operations
-type           type/class-based operations
-comp           generalized composite operations
+f_core/
+  |-- __init__.py ........ import main.py 
+  |-- main.py ............ import the modules and define classes s, t, o and g
+  `-- mods/
+       |-- type/ ......... define the primitive types
+       |-- op/ ........... define the primitive type operations
+       |-- spec/ ......... define the primitive spectra
+       `-- glob/ ......... define the primitive globals
 ```
+
+# Dependencies
+
+1. `python >= 3.9`
+2. `f`
+
+# Install
+
+Through the `main` and `dev` branches of this repo:
+
+* With `pip`:
+```bash
+# main branch
+/path/to/venv/bin/pip install git+https://github.com/f-utils/f-core
+# dev branch
+/path/to/venv/bin/pip install git+https://github.com/f-utils/f-core/tree/dev
+```
+
+For other installation options, see [here](https://futils.org/docs/install).
 
 # Usage
 
-* With `git`: 
-```bash
-git clone https://github.com/ximenesyuri/futils /path/to/venv/lib/python3.x/site-packages/functional_utils
-``` 
-* With `pip`:
-```bash
-/path/to/venv/bin/pip3 install git+https://github.com/ximenesyuri/futils
-```
-* With `poetry`:
-```bash
-poetry add git+https://github.com/ximenesyuri/futils
+We recommend to include `f-core` directly:
+
+```python
+from f_core import *
 ```
 
+This will provide the following classes:
+
+```
+class      alias    scope
+-------------------------------------------
+Types      t        primitive types
+Ops        o        primite type operations
+Globals    g        primite globals
+Specs      s        primitive spectra
+```
+
+For more details, see:
+
+- [user](https://futils.org/libs/f-core/user): user manual
+- [ref](https://futils.org/libs/f-core/ref): reference manual
+
+# License
+
+This software is [licensed](./LICENSE) under MIT.
