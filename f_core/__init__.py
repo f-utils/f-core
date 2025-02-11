@@ -1,4 +1,9 @@
-from f_core.main import *
+from f_core.main import (
+    Types,
+    Ops,
+    Specs,
+    Globals
+)
 
 t = Types
 s = Specs

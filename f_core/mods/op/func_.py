@@ -3,7 +3,7 @@ from f_core.mods.type.helper_ import (
     hinted_domain,
     hinted_codomain
 )
-from f_core.mods.type.type_ import (
+from f_core.mods.type.func_ import (
     HintedDomFunc,
     HintedCodFunc,
     HintedFunc,

@@ -4,7 +4,6 @@ def n_(func):
     return n_func
 
 def curry_(f, x):
-    if isinstance(x, tuple):
-        return lambda *args: f(*x, *args)
-    else:
-        return lambda *args: f(x, *args)
+    if not isinstance(x, tuple):
+        raise TypeError(f'{x} is not a tuple.')
+    return lambda *args: f(*x, *args)
