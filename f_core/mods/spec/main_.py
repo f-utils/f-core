@@ -11,3 +11,4 @@ class Specs:
     belongs = f.s('belongs_')
     bl      = belongs
     n       = f.s('not_')
+    curry   = f.s('curry_')

@@ -1,24 +1,26 @@
-from collections.abc import Iterable, Container, Sequence, Hashable, Callable, Sized
 from types import FunctionType, LambdaType
 import inspect
 from collections.abc import MutableSequence, MutableMapping, MutableSet
 from f_core.mods.glob.sub_ import Sub
+from f_core.mods.type.main_ import StrucTypes as struc
 
 class Is:
     aliases = {
-        'type':       ['t'],
-        'call':       ['callable', 'c'],
-        'func':       ['f', 'function'],
-        'lamb':       ['l'],
-        'cont':       ['container', 'cnt'],
-        'sized':      ['sized', 'szd'],
-        'iter':       ['iterable', 'i', 'it'],
-        'seq':        ['sequence', 'sequencial', 'sq'],
-        'hash':       ['hashable', 'h'],
-        'dyn':        ['dynamic', 'd', 'mutable', 'm'],
-        'empty':      ['e', 'initial'],
-        'singleton':  ['sg', 'terminal'],
-        'null':       ['zero', 'n', 'z']
+        'type':  ['t'],
+        'call':  ['callable', 'c'],
+        'func':  ['f', 'function'],
+        'lamb':  ['l'],
+        'cont':  ['container', 'cnt'],
+        'sized': ['sized', 'szd'],
+        'iter':  ['iterable', 'i', 'it'],
+        'seq':   ['sequence', 'sequencial', 'sq'],
+        'hash':  ['hashable', 'h'],
+        'dyn':   ['dynamic', 'd', 'mutable', 'mut'],
+        'empty': ['e'],
+        'sing':  ['sg', 'singleton'],
+        'null':  ['zero', 'n', 'z'],
+        'map':   ['m', 'mapping'],
+        'app':   ['a', 'append', 'appendable']
     }
 
     @staticmethod
@@ -37,7 +39,7 @@ class Is:
     @staticmethod
     def call(x):
         if isinstance(x, type):
-            return issubclass(x, Callable)
+            return issubclass(x, struc.Call)
         return callable(x)
 
     @staticmethod
@@ -51,32 +53,44 @@ class Is:
     @staticmethod
     def cont(x):
         if isinstance(x, type):
-            return issubclass(x, Container)
-        return isinstance(x, Container)
+            return issubclass(x, struc.Cont)
+        return isinstance(x, struc.Cont)
 
     @staticmethod
     def sized(x):
         if isinstance(x, type):
-            return issubclass(x, Sized)
-        return isinstance(x, Sized)
+            return issubclass(x, struc.Sized)
+        return isinstance(x, struc.Sized)
 
     @staticmethod
     def iter(x):
         if isinstance(x, type):
-            return issubclass(x, Iterable)
-        return isinstance(x, Iterable)
+            return issubclass(x, struc.Iter)
+        return isinstance(x, struc.Iter)
 
     @staticmethod
     def seq(x):
         if isinstance(x, type):
-            return issubclass(x, Sequence)
-        return isinstance(x, Sequence)
+            return issubclass(x, struc.Seq)
+        return isinstance(x, struc.Seq)
 
     @staticmethod
     def hash(x):
         if isinstance(x, type):
-            return issubclass(x, Hashable)
-        return isinstance(x, Hashable)
+            return issubclass(x, struc.Hash)
+        return isinstance(x, struc.Hash)
+
+    @staticmethod
+    def map(x):
+        if isinstance(x, type):
+            return issubclass(x, struc.Map)
+        return isinstance(x, struc.Map)
+
+    @staticmethod
+    def app(x):
+        if isinstance(x, type):
+            return issubclass(x, struc.App)
+        return isinstance(x, struc.App)
 
     @staticmethod
     def dyn(x):
@@ -99,20 +113,21 @@ class Is:
         return False
 
     @staticmethod
-    def singleton(x):
-        if not isinstance(obj, (Sized, Container)):
+    def sing(x):
+        if not isinstance(x, (struc.Sized, struc.Cont)):
             return False
         return len(x) == 1
 
     @staticmethod
     def null(x):
+        if isinstance(x, type):
+            return issubclass(x, struc.Nullable)
         if isinstance(x, (int, float, complex)):
             return x == 0
-        if hasattr(x, '__null__') and callable(x.__null__):
-            return x.__null__()
-        return False
+        if isinstance(x, struc.Nullable):
+            return x.__null__
 
     for base_name, alias_list in aliases.items():
         _func = locals()[base_name]
         for alias in alias_list:
-            locals()[alias] = _func 
+            locals()[alias] = _func
