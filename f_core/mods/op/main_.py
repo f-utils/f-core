@@ -10,5 +10,5 @@ class Ops:
     hfunc  = f.op('hfunc_')
     tfunc  = f.op('tfunc_')
     bfunc  = f.op('bfunc_')
-    sub    = f.op('sub_')
+    filter = f.op('filter_')
     compl  = f.op('compl_')

@@ -118,9 +118,9 @@ def dict_type_(*types):
     class_name = f"dict_({{{', '.join(t.__name__ for t in key_types)}}}:{{{', '.join(t.__name__ for t in value_types)}}})"
     return _dict(class_name, (), {})
 
-def sub_type_(parent, *funcs):
+def filter_type_(parent, *funcs):
     """
-    Build the subtype 'sub_type(X, *funcs)' of a 'parent' type such that:
+    Build the subtype 'filter_type(X, *funcs)' of a 'parent' type such that:
     1. 'x' is an object only if  Each function in 'funcs' is a boolean function
        with the domain 'prod_([parent])'
     3. The subtype includes objects from 'parent' for
@@ -139,7 +139,7 @@ def sub_type_(parent, *funcs):
         if not is_valid_func(f):
             raise TypeError("Each function in 'funcs' must be a callable boolean function with domain 'prod_([parent])'.")
 
-    class _sub(parent):
+    class _filter(parent):
         def __init__(self, value):
             if not all(func.func(value) for func in funcs):
                 raise ValueError("Object does not satisfy all conditions in the given funcs.")
@@ -148,8 +148,8 @@ def sub_type_(parent, *funcs):
         def __instancecheck__(cls, instance):
             return isinstance(instance, parent) and all(func.func(instance) for func in funcs)
 
-    sub_class_name = f"sub_({parent.__name__})"
-    return type(sub_class_name, (_sub,), {})
+    sub_class_name = f"filter_({parent.__name__})"
+    return type(sub_class_name, (_filter,), {})
 
 def compl_type_(parent, *subclasses):
     if not isinstance(parent, type):
