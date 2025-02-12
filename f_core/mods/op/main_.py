@@ -3,7 +3,7 @@ from f_core.mods.op.op_ import *
 class Ops:
     inter  = f.op('inter_')
     prod   = f.op('prod_')
-    coprod = f.op('coprod_')
+    join   = f.op('join_')
     unprod = f.op('unprod_')
     set    = f.op('set_')
     dict   = f.op('dict_')

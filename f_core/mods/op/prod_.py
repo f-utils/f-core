@@ -1,9 +1,9 @@
 from f_core.mods.type.helper_ import flat_, prod_
 
-def coprod_type_(*types):
+def join_type_(*types):
     """
-    Build the 'coproduct' of types:
-        > an object 'p' of the coproduct between 'X, Y, ...'
+    Build the 'join' of types:
+        > an object 'p' of the join between 'X, Y, ...'
         > is an object of some of 'X, Y, ...'
     """
     flat_types = flat_(*types)[0]
@@ -14,7 +14,7 @@ def coprod_type_(*types):
     elif len(flat_types) == 1 and not is_flexible:
        return flat_types[0]
 
-    class _coprod(type):
+    class _join(type):
         def __instancecheck__(cls, instance):
             if type(instance) not in flat_types:
                 return False
@@ -24,8 +24,8 @@ def coprod_type_(*types):
         class_name = f"coprod_[{', '.join(t.__name__ for t in flat_types)}]"
     else:
         class_name = f"coprod_({', '.join(t.__name__ for t in flat_types)})"
-    coprod_ = _coprod(class_name, (), {})
-    return coprod_
+    join_ = _join(class_name, (), {})
+    return join_
 
 def prod_type_(*types):
     """
