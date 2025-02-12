@@ -13,9 +13,9 @@ f.op.i(
 
 # define 'coprod' type op
 f.op.i(
-    'coprod_',
-    'the coproduct of types',
-    coprod_type_
+    'join_',
+    'the join of types',
+    join_type_
 )
 
 # define 'prod' type op

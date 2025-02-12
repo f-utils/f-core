@@ -1,6 +1,6 @@
 from f import f
 from f_core.mods.op.prod_ import (
-    coprod_type_,
+    join_type_,
     prod_type_
 )
 from f_core.mods.op.other_ import (
@@ -26,15 +26,15 @@ f.ds.e(
 
 # define 'coprod' dspec
 f.ds.i(
-    'coprod_',
-    'the coproduct of entities',
-    lambda *args, **kwargs: 'Coproduct not defined for the variable types.'
+    'join_',
+    'the join of entities',
+    lambda *args, **kwargs: 'Join not defined for the variable types.'
 )
 
 f.ds.e(
-    'coprod_',
+    'join_',
     ['Any'],
-    coprod_type_
+    join_type_
 )
 
 # define 'prod' dspec
