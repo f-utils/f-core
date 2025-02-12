@@ -1,10 +1,9 @@
 from f import f
-from f_core.mods.spec.helper_ import (
-    append_list,
-    append_set,
-    append_general
-)
 from f_core.mods.type.main_ import StrucTypes as struc
+from f_core.mods.spec.helper_ import (
+    inter_seq,
+    inter_cont
+)
 
 # define 'append' spec
 f.s.i(
@@ -38,4 +37,14 @@ f.s.e(
 )
 
 # extend the 'inter' dspec
+f.ds.e(
+    'inter_',
+    [struc.Seq],
+    inter_seq
+)
 
+f.ds.e(
+    'inter_',
+    [struc.Cont],
+    inter_cont
+)
