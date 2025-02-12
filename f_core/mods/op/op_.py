@@ -69,9 +69,9 @@ f.op.i(
 
 # define 'sub' type op
 f.op.i(
-    'sub_',
-    'build subtype of types',
-    sub_type_
+    'filter_',
+    'build filtered subtype of types',
+    filter_type_
 )
 
 # define 'compl' type op

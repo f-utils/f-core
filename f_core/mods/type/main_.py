@@ -1,7 +1,7 @@
 from f import f
 from f_core.mods.type.func_  import *
 from f_core.mods.type.struc_ import *
-from f_core.mods.op.prod_    import coprod_type_
+from f_core.mods.op.prod_    import join_type_
 from collections.abc import (
     Sequence,
     Sized,
@@ -53,10 +53,10 @@ class StrucTypes:
     Null       = Nullable
 
 class Any:
-    _initial_any = coprod_type_(*f.t.E().keys())
+    _initial_any = join_type_(*f.t.E().keys())
     @staticmethod
     def get():
-        return coprod_type_(*f.t.E().keys())
+        return join_type_(*f.t.E().keys())
     def tuple():
         return f.t.E().keys()
 

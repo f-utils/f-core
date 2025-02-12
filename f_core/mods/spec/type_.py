@@ -5,7 +5,7 @@ from f_core.mods.op.prod_ import (
 )
 from f_core.mods.op.other_ import (
     inter_type_,
-    sub_type_,
+    filter_type_,
     compl_type_
 )
 from f_core.mods.type.main_ import BooleanFunc
@@ -20,7 +20,7 @@ f.ds.i(
 
 f.ds.e(
     'inter_',
-    ['Any'],
+    [type],
     inter_type_
 )
 
@@ -33,7 +33,7 @@ f.ds.i(
 
 f.ds.e(
     'join_',
-    ['Any'],
+    [type],
     join_type_
 )
 
@@ -46,21 +46,21 @@ f.ds.i(
 
 f.ds.e(
     'prod_',
-    ['Any'],
+    [type],
     prod_type_
 )
 
 # define 'sub' spec
 f.s.i(
-    'sub_',
-    'the subentity of entities',
-    lambda *args, **kwargs: 'Subentity not defined for the variable types.'
+    'filter_',
+    'the filtered subentity of entities',
+    lambda *args, **kwargs: 'Filtering not defined for the variable types.'
 )
 
 f.s.e(
-    'sub_',
+    'filter_',
     (type, BooleanFunc),
-    sub_type_
+    filter_type_
 )
 
 # define 'compl' dspec
