@@ -10,3 +10,5 @@ t = Types
 s = Specs
 g = Globals
 o = Ops
+
+print(s.join(['a', 1], ['b']))
