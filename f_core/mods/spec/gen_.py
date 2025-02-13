@@ -1,8 +1,11 @@
 from f import f
 from f_core.mods.type.main_ import StrucTypes as struc
 from f_core.mods.spec.helper_ import (
-    inter_seq,
-    inter_cont
+    inter_tuple,
+    inter_list,
+    inter_set,
+    inter_dict,
+    inter_str
 )
 
 # define 'append' spec
@@ -39,12 +42,36 @@ f.s.e(
 # extend the 'inter' dspec
 f.ds.e(
     'inter_',
-    [struc.Seq],
-    inter_seq
+    [str],
+    inter_str
 )
 
 f.ds.e(
     'inter_',
-    [struc.Cont],
-    inter_cont
+    [tuple],
+    inter_tuple
+)
+
+f.ds.e(
+    'inter_',
+    [list],
+    inter_list
+)
+
+f.ds.e(
+    'inter_',
+    [set],
+    inter_set
+)
+
+f.ds.e(
+    'inter_',
+    [frozenset],
+    lambda *frozensets: frozenset.intersection(*frozensets)
+)
+
+f.ds.e(
+    'inter_',
+    [dict],
+    inter_dict
 )

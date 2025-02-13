@@ -4,7 +4,6 @@ from f_core.mods.spec.func_ import *
 from f_core.mods.spec.gen_ import *
 
 class Specs:
-    attr    = f.s('attr_')
     inter   = f.ds('inter_')
     prod    = f.ds('prod_')
     join    = f.ds('join_')
