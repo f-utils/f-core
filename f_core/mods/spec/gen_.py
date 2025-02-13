@@ -1,23 +1,7 @@
 from f import f
 from f_core.mods.type.main_ import StrucTypes as struc
 from f_core.mods.type.func_ import BooleanFunc
-from f_core.mods.spec.helper_ import (
-    inter_tuple,
-    inter_list,
-    inter_set,
-    inter_dict,
-    inter_str,
-    filter_str,
-    filter_list,
-    filter_tuple,
-    filter_set,
-    filter_dict,
-    compl_str,
-    compl_list,
-    compl_tuple,
-    compl_set,
-    compl_dict,
-)
+from f_core.mods.spec.helper_ import *
 
 # define 'append' spec
 f.s.i(
@@ -87,8 +71,38 @@ f.ds.e(
     inter_dict
 )
 
-# extend the 'filter' dspec
+# extend 'join' dspec
+f.ds.e(
+    'join_',
+    [str],
+    join_str
+)
 
+f.ds.e(
+    'join_',
+    [tuple],
+    join_tuple
+)
+
+f.ds.e(
+    'join_',
+    [list],
+    join_list
+)
+
+f.ds.e(
+    'join_',
+    [set],
+    join_set
+)
+
+f.ds.e(
+    'join_',
+    [dict],
+    join_dict
+)
+
+# extend the 'filter' dspec
 f.s.e(
     'filter_',
     (str, BooleanFunc),
@@ -148,4 +162,35 @@ f.s.e(
     'compl_',
     (dict, dict),
     compl_dict
+)
+
+# extend the 'prod' dspec
+f.ds.e(
+    'prod_',
+    [str],
+    prod_str
+)
+
+f.ds.e(
+    'prod_',
+    [tuple],
+    prod_tuple
+)
+
+f.ds.e(
+    'prod_',
+    [list],
+    prod_list
+)
+
+f.ds.e(
+    'prod_',
+    [set],
+    prod_set
+)
+
+f.ds.e(
+    'prod_',
+    [dict],
+    prod_dict
 )

@@ -1,4 +1,5 @@
 from f_core.mods.glob.sub_ import Sub as sub
+from itertools import product
 
 def n_(func):
     def n_func(*args):
@@ -9,6 +10,23 @@ def curry_(f, x):
     if not isinstance(x, tuple):
         raise TypeError(f'{x} is not a tuple.')
     return lambda *args: f(*x, *args)
+
+def join_str(str1, str2):
+    return ''.join([str1, str2])
+
+def join_list(list1, list2):
+    return list1.extend(list2) or list1
+
+def join_tuple(tuple1, tuple2):
+    return tuple1.__add__(tuple2)
+
+def join_set(set1, set2):
+    return set1.union(set2)
+
+def join_dict(dict1, dict2):
+    combined_dict = dict1.copy()
+    combined_dict.update(dict2)
+    return combined_dict
 
 def inter_str(*strings):
     return ''.join(char for i, char in enumerate(strings[0]) if all(i < len(string) and char == string[i] for string in strings[1:]))
@@ -103,3 +121,19 @@ def compl_str(X, A):
     if sub.seq(A, X):
         return ''.join(x for x in X if x not in A)
     raise AttributeError(f'{A} is not a subsequence of {X}.')
+
+
+def prod_str(x, y):
+    return [''.join(pair) for pair in itertools.product(x, y)]
+
+def prod_tuple(X, Y):
+    return tuple(product(X, Y))
+
+def prod_list(X, Y):
+    return list(product(X, Y))
+
+def prod_set(X, Y):
+    return set(product(X, Y))
+
+def prod_dict(X, Y):
+    return {(k1, k2): (v1, v2) for k1, v1 in X.items() for k2, v2 in Y.items()}
