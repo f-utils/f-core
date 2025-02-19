@@ -124,5 +124,14 @@ def check_codomain(func, expected_codomain, actual_codomain):
                 )
         else:
             raise TypeError(f"All entries of actual '{actual_codomain}' and expected codomain '{expected_codomain}' must be types.")
+    elif type(actual_codomain) is type and type(expected_codomain) is list:
+        if all(type(i) is type for i in expected_codomain):
+            if not any(issubclass(actual_codomain, i) for i in expected_codomain):
+                raise TypeError(
+                    f"Codomain mismatch in func '{func.__name__}': expected '{expected_codomain}', "
+                    f" got '{actual_codomain.__name__}'."
+                )
+        else:
+            raise TypeError(f"All entries of expected codomain '{expected_codomain}' must be types.")
     else:
-        raise TypeError(f"Both actual domain '{actual_codomain}' and expected domain '{expected_codomain}' must be types os lists of types.")
+        raise TypeError(f"Both actual domain '{actual_codomain}' and expected domain '{expected_codomain}' must be types or '{expected_codomain}'  must be a list of types.")
