@@ -109,7 +109,7 @@ def check_codomain(func, expected_codomain, actual_codomain):
     Compare the expected and actual codomain types. If there's a mismatch,
     raise a TypeError with a detailed message.
     """
-    if type(actual_codomain) is type and type(expected_codomain):
+    if type(actual_codomain) is type and type(expected_codomain) is type:
         if not issubclass(actual_codomain, expected_codomain):
             raise TypeError(
                 f"Codomain mismatch in func '{func.__name__}': expected '{expected_codomain.__name__}', "
