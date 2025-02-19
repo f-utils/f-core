@@ -125,4 +125,4 @@ def check_codomain(func, expected_codomain, actual_codomain):
         else:
             raise TypeError(f"All entries of actual '{actual_codomain}' and expected codomain '{expected_codomain}' must be types.")
     else:
-        raise TypeError(f"Both actual domain '{actual_domain}' and expected domain '{expected_codomain}' must be types os lists of types.")
+        raise TypeError(f"Both actual domain '{actual_codomain}' and expected domain '{expected_codomain}' must be types os lists of types.")
