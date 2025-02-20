@@ -194,24 +194,20 @@ class TypedFunc(TypedDomFunc, TypedCodFunc):
         is_codomain_hinted(func)
         TypedDomFunc.__init__(self, func)
         TypedCodFunc.__init__(self, func)
-        self.__name__ = func.__name__
+        wraps(func)(self)
+        self.func = func
 
-        # Use wraps to maintain function metadata
-        self.func = wraps(func)(self._create_wrapped_function(func))
-
-    def _create_wrapped_function(self, func):
-        @wraps(func)
-        def wrapped(*args, **kwargs):
-            is_domain_hinted(func)
-            is_codomain_hinted(func)
+    def __call__(self, *args, **kwargs):
+        @wraps(self.func)
+        def wrapped_function(*args, **kwargs):
+            is_domain_hinted(self.func)
+            is_codomain_hinted(self.func)
             result = TypedDomFunc.__call__(self, *args, **kwargs)
             actual_codomain = type(result)
             check_codomain(self.func, self._hinted_codomain, actual_codomain)
             return result
-        return wrapped
 
-    def __call__(self, *args, **kwargs):
-        return self.func(*args, **kwargs)
+        return wrapped_function(*args, **kwargs)
 
     def __mul__(self, other):
         if not isinstance(other, TypedFunc):
