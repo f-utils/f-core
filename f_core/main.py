@@ -6,8 +6,9 @@ from f_core.mods.glob.main_ import *
 
 
 class Types(FuncTypes):
-    Any = Any
-    any = Any
+    Any   = Any
+    any   = Any
+    typed = typed
 
 class Globals:
     Is = Is
@@ -22,3 +23,4 @@ class Ops(Ops):
 
 class Specs(Specs):
     pass
+

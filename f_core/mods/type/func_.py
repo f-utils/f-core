@@ -174,7 +174,6 @@ class TypedCodFunc(HintedCodFunc):
         def codomain(self):
             return self.hinted_codomain
 
-
 class TypedFunc(TypedDomFunc, TypedCodFunc):
     """
     The class of 'typed functions':
@@ -182,32 +181,35 @@ class TypedFunc(TypedDomFunc, TypedCodFunc):
         2. type hints are checked at runtime
         3. defined domain and codomain based on type hints
         4. safe composition (based on type hints)
-    It is a subclass of:
-        1. 'TypedDomFunc'
-        2. 'TypedCodFunc'
-        3. 'HintedFunc'
     """
+
     def __init__(self, func):
         if not callable(func):
             raise TypeError(f"'{func}' is not callable.")
+
+        # Check function type hints
         is_domain_hinted(func)
         is_codomain_hinted(func)
+
+        # Initialize base classes
         TypedDomFunc.__init__(self, func)
         TypedCodFunc.__init__(self, func)
-        wraps(func)(self)
+
         self.func = func
 
     def __call__(self, *args, **kwargs):
-        @wraps(self.func)
-        def wrapped_function(*args, **kwargs):
-            is_domain_hinted(self.func)
-            is_codomain_hinted(self.func)
-            result = TypedDomFunc.__call__(self, *args, **kwargs)
-            actual_codomain = type(result)
-            check_codomain(self.func, self._hinted_codomain, actual_codomain)
-            return result
+        # Run type hint checks before execution
+        is_domain_hinted(self.func)
+        is_codomain_hinted(self.func)
 
-        return wrapped_function(*args, **kwargs)
+        # Call the function itself
+        result = self.func(*args, **kwargs)
+
+        # Validate the return type
+        actual_codomain = type(result)
+        check_codomain(self.func, self._hinted_codomain, actual_codomain)
+        
+        return result
 
     def __mul__(self, other):
         if not isinstance(other, TypedFunc):
@@ -222,9 +224,12 @@ class TypedFunc(TypedDomFunc, TypedCodFunc):
                     f"Hinted codomain '{f_codomain.__name__}' of '{f.__name__}' "
                     f"does not match hinted domain '{g_domain.__name__}' of '{g.__name__}'."
                 )
+
             def comp(*args: f.hinted_domain) -> g.hinted_codomain:
                 return g.func(f.func(*args))
+
             return TypedFunc(comp)
+
         return safe_comp(self, other)
 
     @property
@@ -234,6 +239,14 @@ class TypedFunc(TypedDomFunc, TypedCodFunc):
     @property
     def codomain(self):
         return self._hinted_codomain
+
+
+def typed(func):
+    """Decorator that wraps a function with TypedFunc."""
+    
+    # Use wraps to preserve the metadata
+    wrapped_func = TypedFunc(func)
+    return wraps(func)(wrapped_func)
 
 class BooleanFunc(TypedFunc):
     """
