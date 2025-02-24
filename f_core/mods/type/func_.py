@@ -187,28 +187,21 @@ class TypedFunc(TypedDomFunc, TypedCodFunc):
         if not callable(func):
             raise TypeError(f"'{func}' is not callable.")
 
-        # Check function type hints
         is_domain_hinted(func)
         is_codomain_hinted(func)
-
-        # Initialize base classes
         TypedDomFunc.__init__(self, func)
         TypedCodFunc.__init__(self, func)
-
         self.func = func
 
     def __call__(self, *args, **kwargs):
-        # Run type hint checks before execution
         is_domain_hinted(self.func)
         is_codomain_hinted(self.func)
-
-        # Call the function itself
         result = self.func(*args, **kwargs)
-
-        # Validate the return type
         actual_codomain = type(result)
+        expected_types = self.hinted_domain
+        actual_types = tuple(map(type, args))
+        check_domain(self.func, self.param_names, expected_types, actual_types)
         check_codomain(self.func, self._hinted_codomain, actual_codomain)
-        
         return result
 
     def __mul__(self, other):
@@ -224,27 +217,20 @@ class TypedFunc(TypedDomFunc, TypedCodFunc):
                     f"Hinted codomain '{f_codomain.__name__}' of '{f.__name__}' "
                     f"does not match hinted domain '{g_domain.__name__}' of '{g.__name__}'."
                 )
-
             def comp(*args: f.hinted_domain) -> g.hinted_codomain:
                 return g.func(f.func(*args))
-
             return TypedFunc(comp)
-
         return safe_comp(self, other)
 
     @property
     def domain(self):
         return self._hinted_domain
-
     @property
     def codomain(self):
         return self._hinted_codomain
 
-
 def typed(func):
     """Decorator that wraps a function with TypedFunc."""
-    
-    # Use wraps to preserve the metadata
     wrapped_func = TypedFunc(func)
     return wraps(func)(wrapped_func)
 
@@ -254,11 +240,9 @@ class BooleanFunc(TypedFunc):
         1. are typed functions
         2. its codomain is always 'bool'
     """
-
     def __init__(self, func):
         super().__init__(func)
         if hinted_codomain(self.func) is not bool:
             raise TypeError(f"'{self.func.__name__}' does not have 'bool' as its return type.")
-
     def __instancecheck__(self, instance):
         return isinstance(instance, TypedFunc) and hinted_codomain(instance.func) == bool
