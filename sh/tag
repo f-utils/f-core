@@ -1,0 +1,117 @@
+#!/bin/sh
+
+PYPROJECT_TOML="${BASH_SOURCE[0]%/*}/../pyproject.toml"
+
+version_(){
+    echo "$(grep -Po '(?<=version = ")[0-9]+\.[0-9]+\.[0-9]+' "$PYPROJECT_TOML")"
+}
+
+push_(){
+    version=$(version_)
+    latest_tag=$(git describe --tags --abbrev=0)
+    if [ "$latest_tag" == "$version" ]; then
+        git push origin "$latest_tag"
+        echo "done: successfully pushed tag \"$latest_tag\" to origin."
+    else
+        echo "error: Latest tag \"$latest_tag\" does not match version \"$version\" in pyproject.toml."
+        echo "info: try 'tag new'."
+        return 1
+    fi
+}
+
+new_(){
+    version=$(version_)
+    IFS='.' read major minor patch <<< "$version"
+    case $1 in
+        patch) new_version="${major}.${minor}.$((patch + 1))" ;;
+        minor) new_version="${major}.$((minor + 1)).0" ;;
+        major) new_version="$((major + 1)).0.0" ;;
+        *) echo "error: Invalid kind: $1."
+           echo "info: kind must be \"patch\", \"minor\", or \"major\"."
+           return 1 ;;
+    esac
+    sed -i -E "s/version = \"[0-9]+\.[0-9]+\.[0-9]+\"/version = \"$new_version\"/" "$PYPROJECT_TOML"
+    if [[ ! "$?" == "0" ]]; then
+        echo "error: could not change version in pyproject.toml"
+        return 1
+    fi
+    git tag -a "$new_version" -m "$2"
+    if [[ ! "$?" == "0" ]]; then
+        echo "error: could not create git tag."
+        return 1
+    fi
+    echo "done: tag \"$new_version\" was created with message \"$2\"."    
+}
+
+list_() { 
+  local current_tag
+  current_tag=$(git describe --tags --exact-match 2>/dev/null)
+
+  if [ -n "$current_tag" ]; then
+    local is_pushed
+    is_pushed=$(git ls-remote --tags origin | grep -q "refs/tags/$current_tag" && echo "pushed" || echo "non pushed")
+  fi
+
+  local format_string='%(refname:short)'
+    format_string+=' %(subject)'
+
+  while IFS= read -r tag; do
+    local tag_name message
+    tag_name=$(echo "$tag" | awk '{print $1}')
+    message=$(echo "$tag" | sed "s/^$tag_name\s*//")
+    if [ "$tag_name" == "$current_tag" ]; then
+      echo "$tag_name [$message] (current, $is_pushed)"
+    else
+      echo "$tag_name" [$message]
+    fi 
+  done <<< "$(git for-each-ref --sort=-creatordate --format="$format_string" refs/tags)"
+}
+
+help_(){
+    echo "Usage:
+    tag (option) [argument]
+
+Options:
+    n, new [version] \"message\" ........ create new git tag
+    l, list ........................... list the git tags
+    p, push ........................... push git tag
+    help, --help ...................... print this message
+
+[version] = p/patch, m/minor, M/major
+"    
+}
+
+tag_(){
+    if [ -z "$1" ] || 
+       [ "$1" == "help" ] || 
+       [ "$1" == "--help" ]; then
+        help_
+        return 1
+    elif [ "$1" == "n" ] ||
+         [ "$1" == "new" ]; then
+        shift 1
+        new_ "$@"
+        if [[ ! "$?" == "0" ]]; then
+            return 1
+        fi
+    elif [ "$1" == "l" ] ||
+         [ "$1" == "list" ]; then
+        shift 1
+        list_ "$@"
+        if [[ ! "$?" == "0" ]]; then
+            return 1
+        fi
+    elif [ "$1" == "p" ] ||
+         [ "$1" == "push" ]; then
+        shift 1
+        push_ "$@"
+        if [[ ! "$?" == "0" ]]; then
+            return 1
+        fi
+    else
+        echo "error: option not defined for \"tag\"."
+        echo "info: try 'tag --help'"
+    fi
+}
+
+tag_ "$@"
