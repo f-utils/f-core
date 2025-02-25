@@ -101,7 +101,7 @@ def extract_component_types(expected_type):
     except AttributeError:
         return []
 
-def check_domain(func, param_names, expected_domain, actual_domain, ops=None):
+def check_domain(func, param_names, expected_domain, actual_domain, args):
     mismatches = []
     for name, expected, actual in zip(param_names, expected_domain, actual_domain):
         expected_name = getattr(expected, '__name__', repr(expected))
@@ -111,13 +111,17 @@ def check_domain(func, param_names, expected_domain, actual_domain, ops=None):
             component_types = extract_component_types(expected)
             for op_name, op_data in f.op.E().items():
                 op_func = op_data['op']['func']
-                print(op_func(*component_types))
-                print(expected)
-
                 if expected.__name__ == op_func(*component_types).__name__:
-                    if issubclass(expected, actual):
-                        matched = True
-                        break
+                    matched = True
+                    if issubclass(expected, actual) and hasattr(expected, 'check'):
+                        actual_value = args[param_names.index(name)]
+                        if not expected.check(actual_value):
+                            raise TypeError(
+                                f"Domain check failed in func '{func.__name__}':"
+                                f"\n\t --> '{name}': expected type '{expected_name}' did not match "
+                                f"the actual value '{actual_value}'."
+                            )
+                    break
             if not matched:
                 mismatches.append(f"\n\t --> '{name}': should be '{expected_name}', but got '{actual_name}'")
     if mismatches:
