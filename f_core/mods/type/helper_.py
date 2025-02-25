@@ -128,34 +128,37 @@ def check_domain(func, param_names, expected_domain, actual_domain, args):
         mismatch_str = "".join(mismatches) + "."
         raise TypeError(f"Domain mismatch in func '{func.__name__}': {mismatch_str}")
 
-def check_codomain(func, expected_codomain, actual_codomain):
-    """
-    Compare the expected and actual codomain types. If there's a mismatch,
-    raise a TypeError with a detailed message.
-    """
+def check_codomain(func, expected_codomain, actual_codomain, result):
+    get_name = lambda x: getattr(x, '__name__', repr(x))
+
     if type(actual_codomain) is type and type(expected_codomain) is type:
-        if not issubclass(actual_codomain, expected_codomain):
+        if expected_codomain != actual_codomain:
+            matched = False
+            component_types = extract_component_types(expected_codomain)
+            for op_name, op_data in f.op.E().items():
+                op_func = op_data['op']['func']
+                if expected_codomain.__name__ == op_func(*component_types).__name__:
+                    matched = True
+                    if issubclass(expected_codomain, actual_codomain) and hasattr(expected_codomain, 'check'):
+                        if not expected_codomain.check(result):
+                            raise TypeError(
+                                f"Codomain check failed in func '{func.__name__}': expected type operation "
+                                f"'{get_name(expected_codomain)}' did not match the actual result '{result}'."
+                            )
+                    break
+            if not matched:
+                raise TypeError(
+                    f"Codomain mismatch in func '{func.__name__}': expected '{get_name(expected_codomain)}', "
+                    f"got '{get_name(actual_codomain)}'."
+                )
+    elif isinstance(actual_codomain, list) and isinstance(expected_codomain, list):
+        if not any(issubclass(ac, ec) for ac, ec in zip(actual_codomain, expected_codomain)):
             raise TypeError(
-                f"Codomain mismatch in func '{func.__name__}': expected '{expected_codomain.__name__}', "
-                f" got '{actual_codomain.__name__}'."
+                f"Codomain mismatch in func '{func.__name__}': expected types '{[get_name(ec) for ec in expected_codomain]}', "
+                f"got '{get_name(actual_codomain)}'."
             )
-    elif type(actual_codomain) is list and type(expected_codomain) is list:
-        if all(type(i) is type and type(j) is type for (i, j) in zip(actual_codomain, expected_codomain)):
-            if not any(issubclass(i, j) for (i,j) in zip(actual_codomain, expected_codomain)):
-                raise TypeError(
-                    f"Codomain mismatch in func '{func.__name__}': expected '{expected_codomain}', "
-                    f" got '{actual_codomain.__name__}'."
-                )
-        else:
-            raise TypeError(f"All entries of actual '{actual_codomain}' and expected codomain '{expected_codomain}' must be types.")
-    elif type(actual_codomain) is type and type(expected_codomain) is list:
-        if all(type(i) is type for i in expected_codomain):
-            if not any(issubclass(actual_codomain, i) for i in expected_codomain):
-                raise TypeError(
-                    f"Codomain mismatch in func '{func.__name__}': expected '{expected_codomain.__name__}', "
-                    f" got '{actual_codomain.__name__}'."
-                )
-        else:
-            raise TypeError(f"All entries of expected codomain '{expected_codomain.__name__}' must be types.")
     else:
-        raise TypeError(f"Both actual domain '{actual_codomain.__name__}' and expected domain '{expected_codomain.__name__}' must be types or '{expected_codomain.__name__}'  must be a list of types.")
+        raise TypeError(
+            f"Codomain mismatch in func '{func.__name__}': expected '{get_name(expected_codomain)}', "
+            f"got '{get_name(actual_codomain)}'."
+        )
