@@ -22,8 +22,11 @@ def inter_type_(*types):
         def __instancecheck__(cls, instance):
             return all(isinstance(instance, t) for t in unique_types)
 
-    _inter.__name__ = class_name
-    return _inter
+        def check(self, instance):
+            return all(isinstance(instance, t) for t in self.__types__)
+
+    class_name = f"inter_({', '.join(t.__name__ for t in types)})"
+    return _inter(class_name, unique_types, {'__types__': unique_types}) 
 
 
 def tuple_type_(*args):
@@ -35,11 +38,10 @@ def tuple_type_(*args):
     """
     flat_types, is_flexible = flat_(*args)
 
-    # Ensure all elements are types
     if not all(isinstance(t, type) for t in flat_types):
         raise TypeError("All elements must be types.")
 
-    class TupleMeta(type):
+    class _tuple(type):
         def __instancecheck__(cls, instance):
             if not isinstance(instance, tuple):
                 return False
@@ -47,8 +49,15 @@ def tuple_type_(*args):
                 return False
             return all(isinstance(x, t) for x, t in zip(instance, flat_types))
 
+        def check(self, instance):
+            if not isinstance(instance, tuple):
+                return False
+            if len(instance) != len(self.__types__):
+                return False
+            return all(isinstance(x, t) for x, t in zip(instance, self.__types__))
+
     class_name = f"tuple_({', '.join(t.__name__ for t in flat_types)})"
-    return TupleMeta(class_name, (tuple,), {'__types__': flat_types})
+    return _tuple(class_name, (tuple,), {'__types__': flat_types})
 
 def list_type_(*args):
     """
@@ -62,15 +71,23 @@ def list_type_(*args):
     if not all(isinstance(t, type) for t in flat_types):
         raise TypeError("All elements must be types.")
 
-    class ListMeta(type):
+    class _list(type):
         def __instancecheck__(cls, instance):
             if not isinstance(instance, list):
                 return False
             return all(any(isinstance(x, t) for t in flat_types) for x in instance)
 
+        def check(self, instance):
+            if not isinstance(instance, list):
+                return False
+            for item in instance:
+                if not any(isinstance(item, t) for t in self.__types__):
+                    return False
+            return True
+
     class_name = f"list_([{', '.join(t.__name__ for t in flat_types)}])"
 
-    return ListMeta(class_name, (list,), {'__types__': flat_types})
+    return _list(class_name, (list,), {'__types__': flat_types})
 
 def set_type_(*types):
     """
@@ -107,11 +124,16 @@ def set_type_(*types):
                     return False
             return all(count == 0 for count in type_counts.values())
 
+        def check(self, instance):
+            if not isinstance(instance, set):
+                return False
+            return all(any(isinstance(item, t) for t in self.__types__) for item in instance)
+
     if is_flexible:
         class_name = f"set_([{', '.join(t.__name__ for t in flat_types)}])"
     else:
         class_name = f"set_({', '.join(t.__name__ for t in flat_types)})"
-    return _set(class_name, (), {})
+    return _set(class_name, (set,), {'__types__': flat_types})
 
 def dict_type_(*types):
     """
@@ -136,34 +158,25 @@ def dict_type_(*types):
         def __instancecheck__(cls, instance):
             if not isinstance(instance, dict):
                 return False
-            if is_key_flexible and is_value_flexible:
-                for key, value in instance.items():
-                    if not isinstance(key, tuple(key_types)) or not isinstance(value, tuple(value_types)):
-                        return False
-                return True
-
-            if len(instance) != len(key_types) or len(instance) != len(value_types):
-                return False
-            key_count = {typ: key_types.count(typ) for typ in key_types}
-            value_count = {typ: value_types.count(typ) for typ in value_types}
-
             for key, value in instance.items():
-                key_matched = value_matched = False
-                for key_type, value_type in zip(key_count, value_count):
-                    if isinstance(key, key_type) and key_count[key_type] > 0:
-                        key_count[key_type] -= 1
-                        key_matched = True
-
-                    if isinstance(value, value_type) and value_count[value_type] > 0:
-                        value_count[value_type] -= 1
-                        value_matched = True
-
-                if not key_matched or not value_matched:
+                if not any(isinstance(key, key_type) for key_type in key_types):
                     return False
-            return all(count == 0 for count in key_count.values()) and all(count == 0 for count in value_count.values())
+                if not any(isinstance(value, value_type) for value_type in value_types):
+                    return False
+            return True
+
+        def check(self, instance):
+            if not isinstance(instance, dict):
+                return False
+            for key, value in instance.items():
+                if not any(isinstance(key, kt) for kt in self.__types__[0]):
+                    return False
+                if not any(isinstance(value, vt) for vt in self.__types__[1]):
+                    return False
+            return True
 
     class_name = f"dict_({{{', '.join(t.__name__ for t in key_types)}}}:{{{', '.join(t.__name__ for t in value_types)}}})"
-    return _dict(class_name, (), {})
+    return _dict(class_name, (dict,), {'__types__': (key_types, value_types)}) 
 
 def filter_type_(parent, *funcs):
     """
@@ -195,6 +208,11 @@ def filter_type_(parent, *funcs):
         def __instancecheck__(cls, instance):
             return isinstance(instance, parent) and all(func.func(instance) for func in funcs)
 
+        def check(self, instance):
+            if not isinstance(instance, parent):
+                return False
+            return all(func(instance) for func in funcs)
+
     sub_class_name = f"filter_({parent.__name__})"
     return type(sub_class_name, (_filter,), {})
 
@@ -207,7 +225,8 @@ def compl_type_(parent, *subclasses):
             mistake_subclasses.append(subclass)
     if mistake_subclasses:
         raise TypeError(f"'{missing_subclasses}' are not a subtypes of '{parent}'.")
-    class ComplementType(parent):
+
+    class _compl(parent):
         def __new__(cls, value, *args, **kwargs):
             mistake_values = []
             mistake_subclasses = []
@@ -228,4 +247,8 @@ def compl_type_(parent, *subclasses):
         def __instancecheck__(cls, instance):
             return isinstance(instance, ComplementType) and not any(isinstance(instance.value, subclass) for subclass in subclasses)
 
-    return ComplementType
+        def check(self, instance):
+            return isinstance(instance, parent) and not any(isinstance(instance, subclass) for subclass in self.__excluded__)
+
+    class_name = f"compl_({parent.__name__}, {', '.join(sub.__name__ for sub in subclasses)})"
+    return type(class_name, (_compl,), {'__excluded__': subclasses})

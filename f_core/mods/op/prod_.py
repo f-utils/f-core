@@ -6,26 +6,17 @@ def join_type_(*types):
         > an object 'p' of the join between 'X, Y, ...'
         > is an object of some of 'X, Y, ...'
     """
-    flat_types = flat_(*types)[0]
-    is_flexible = flat_(*types)[1]
-
-    if len(flat_types) == 0:
-        return type(None)
-    elif len(flat_types) == 1 and not is_flexible:
-       return flat_types[0]
+    flat_types, is_flexible = flat_(*types)
 
     class _join(type):
         def __instancecheck__(cls, instance):
-            if type(instance) not in flat_types:
-                return False
-            return True
+            return isinstance(instance, tuple(flat_types))
 
-    if is_flexible:
-        class_name = f"coprod_[{', '.join(t.__name__ for t in flat_types)}]"
-    else:
-        class_name = f"coprod_({', '.join(t.__name__ for t in flat_types)})"
-    join_ = _join(class_name, (), {})
-    return join_
+        def check(self, instance):
+            return isinstance(instance, tuple(self.__types__))
+
+    class_name = f"join_({', '.join(t.__name__ for t in flat_types)})"
+    return _join(class_name, (), {'__types__': flat_types})
 
 def prod_type_(*types):
     """
@@ -34,7 +25,25 @@ def prod_type_(*types):
         > are the tuples '(x, y, ...)' such that
         > 'x, y, ...' are in 'X, Y, ...'
     """
-    return prod_(*types)
+    flat_types, is_flexible = flat_(*types)
+
+    class _prod(type):
+        def __instancecheck__(cls, instance):
+            if not isinstance(instance, tuple):
+                return False
+            if len(instance) != len(flat_types):
+                return False
+            return all(isinstance(x, t) for x, t in zip(instance, flat_types))
+
+        def check(self, instance):
+            if not isinstance(instance, tuple):
+                return False
+            if len(instance) != len(self.__types__):
+                return False
+            return all(isinstance(x, t) for x, t in zip(instance, self.__types__))
+
+    class_name = f"prod_({', '.join(t.__name__ for t in flat_types)})"
+    return _prod(class_name, (tuple,), {'__types__': flat_types})
 
 def unprod_type_(*types):
     """
@@ -73,8 +82,14 @@ def unprod_type_(*types):
                     return False
             return all(count == 0 for count in type_counts.values())
 
+        def check(self, instance):
+            if not isinstance(instance, set):
+                return False
+            return all(any(isinstance(elem, typ) for typ in self.__types__) for elem in instance)
+
+
     if is_flexible:
         class_name = f"unprod_[{', '.join(t.__name__ for t in flat_types)}]"
     else:
         class_name = f"unprod_({', '.join(t.__name__ for t in flat_types)})"
-    return _unprod(class_name, (), {})
+    return _unprod(class_name, (set,), {'__types__': flat_types})
