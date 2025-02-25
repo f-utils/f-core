@@ -1,5 +1,6 @@
 import inspect
 from typing import get_type_hints
+from f import f
 
 def flat_(*types):
     if not types:
@@ -93,13 +94,32 @@ def hinted_codomain(func):
     type_hints = get_type_hints(func)
     return type_hints.get('return', type(None))
 
-def check_domain(func, param_names, expected_domain, actual_domain):
+def extract_component_types(expected_type):
+    """Extracts component types as a list from expected_type's __types__ attribute."""
+    try:
+        return getattr(expected_type, '__types__', [])
+    except AttributeError:
+        return []
+
+def check_domain(func, param_names, expected_domain, actual_domain, ops=None):
     mismatches = []
     for name, expected, actual in zip(param_names, expected_domain, actual_domain):
         expected_name = getattr(expected, '__name__', repr(expected))
         actual_name = getattr(actual, '__name__', repr(actual))
         if expected != actual:
-            mismatches.append(f"\n\t --> '{name}': should be '{expected_name}', but got '{actual_name}'")
+            matched = False
+            component_types = extract_component_types(expected)
+            for op_name, op_data in f.op.E().items():
+                op_func = op_data['op']['func']
+                print(op_func(*component_types))
+                print(expected)
+
+                if expected.__name__ == op_func(*component_types).__name__:
+                    if issubclass(expected, actual):
+                        matched = True
+                        break
+            if not matched:
+                mismatches.append(f"\n\t --> '{name}': should be '{expected_name}', but got '{actual_name}'")
     if mismatches:
         mismatch_str = "".join(mismatches) + "."
         raise TypeError(f"Domain mismatch in func '{func.__name__}': {mismatch_str}")

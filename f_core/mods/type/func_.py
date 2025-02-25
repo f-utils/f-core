@@ -174,7 +174,7 @@ class TypedCodFunc(HintedCodFunc):
         def codomain(self):
             return self.hinted_codomain
 
-class TypedFunc(TypedDomFunc, TypedCodFunc):
+class TypedFunc(HintedFunc, TypedDomFunc, TypedCodFunc):
     """
     The class of 'typed functions':
         1. have type hints

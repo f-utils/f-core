@@ -25,6 +25,53 @@ def inter_type_(*types):
     _inter.__name__ = class_name
     return _inter
 
+
+def tuple_type_(*args):
+    """
+    Define a metaclass for tuples that consist of specified types.
+    This function accepts either:
+      - Unpacked types (e.g., tuple_type_(type1, type2, ...))
+      - A single list of types (e.g., tuple_type_([type1, type2, ...]))
+    """
+    flat_types, is_flexible = flat_(*args)
+
+    # Ensure all elements are types
+    if not all(isinstance(t, type) for t in flat_types):
+        raise TypeError("All elements must be types.")
+
+    class TupleMeta(type):
+        def __instancecheck__(cls, instance):
+            if not isinstance(instance, tuple):
+                return False
+            if len(instance) != len(flat_types):
+                return False
+            return all(isinstance(x, t) for x, t in zip(instance, flat_types))
+
+    class_name = f"tuple_({', '.join(t.__name__ for t in flat_types)})"
+    return TupleMeta(class_name, (tuple,), {'__types__': flat_types})
+
+def list_type_(*args):
+    """
+    Define a metaclass for lists that consist of specified types.
+    This function accepts either:
+      - Unpacked types (e.g., list_type_(type1, type2, ...))
+      - A single list of types (e.g., list_type_([type1, type2, ...]))
+    """
+    flat_types, is_flexible = flat_(*args)
+
+    if not all(isinstance(t, type) for t in flat_types):
+        raise TypeError("All elements must be types.")
+
+    class ListMeta(type):
+        def __instancecheck__(cls, instance):
+            if not isinstance(instance, list):
+                return False
+            return all(any(isinstance(x, t) for t in flat_types) for x in instance)
+
+    class_name = f"list_([{', '.join(t.__name__ for t in flat_types)}])"
+
+    return ListMeta(class_name, (list,), {'__types__': flat_types})
+
 def set_type_(*types):
     """
     Build the 'set product' of types:
