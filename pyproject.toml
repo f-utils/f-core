@@ -1,9 +1,9 @@
 [project]
 name = "f-core"
-version = "0.0.0"
+version = "0.0.2"
 description = "The f-utils lib with primitive functions"
 readme = "README.md"
-requires-python = ">=3.6"
+requires-python = ">=3.9"
 license = {text = "MIT"}
 authors = [
     {name = "Yuri Ximenes", email = "yx.dev@gmx.ie"},
@@ -13,5 +13,6 @@ authors = [
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-packages = ["f_core"]    
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["f_core*"]   
