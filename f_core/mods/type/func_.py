@@ -141,7 +141,7 @@ class TypedDomFunc(HintedDomFunc):
         is_domain_hinted(self.func)
         expected_types = self.hinted_domain
         actual_types = tuple(map(type, args))
-        check_domain(self.func, self.param_names, expected_types, actual_types)
+        check_domain(self.func, self.param_names, expected_types, actual_types, args)
         return super().__call__(*args, **kwargs)
 
     @property
@@ -160,14 +160,13 @@ class TypedCodFunc(HintedCodFunc):
         is_codomain_hinted(func)
         super().__init__(func)
         self.hinted_codomain = hinted_codomain(func)
-        check_codomain(func, self.hinted_codomain, runtime_codomain(func))
         self.__name__ = func.__name__
 
     def __call__(self, *args, **kwargs):
         is_codomain_hinted(self.func)
         result = super().__call__(*args, **kwargs)
         actual_codomain = type(result)
-        check_codomain(self.func, self._hinted_codomain, actual_codomain)
+        check_codomain(self.func, self._hinted_codomain, actual_codomain, result)
         return result
 
         @property
@@ -196,12 +195,12 @@ class TypedFunc(HintedFunc, TypedDomFunc, TypedCodFunc):
     def __call__(self, *args, **kwargs):
         is_domain_hinted(self.func)
         is_codomain_hinted(self.func)
-        result = self.func(*args, **kwargs)
-        actual_codomain = type(result)
         expected_types = self.hinted_domain
         actual_types = tuple(map(type, args))
-        check_domain(self.func, self.param_names, expected_types, actual_types)
-        check_codomain(self.func, self._hinted_codomain, actual_codomain)
+        check_domain(self.func, self.param_names, expected_types, actual_types, args)
+        result = self.func(*args, **kwargs)
+        actual_codomain = type(result)
+        check_codomain(self.func, self._hinted_codomain, actual_codomain, result)
         return result
 
     def __mul__(self, other):
