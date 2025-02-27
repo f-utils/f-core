@@ -66,6 +66,12 @@ Specs      s        primitive spectra
 
 For more details, see [futils.org/libs/f-core](https://futils.org/libs/f-core).
 
+# Contributing
+
+- Open issues in [f-utils/.issues](https://github.com/f-utils/.issues).
+- Join our [Discord](https://discord.gg/waANUyCUGE) server.
+- See [CONTRIBUTING](https://github.com/f-utils/.github/blob/main/CONTRIBUTING.md).
+
 # License
 
-This software is [licensed](./LICENSE) under BSD.
+This software is [licensed](./LICENSE) under `BSD Clause-3`.
