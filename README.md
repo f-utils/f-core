@@ -29,7 +29,7 @@ f_core/
 # Dependencies
 
 1. `python >= 3.9`
-2. `f`
+2. `f-utils/f`
 
 # Install
 
@@ -43,7 +43,7 @@ Through the `main` and `dev` branches of this repo:
 /path/to/venv/bin/pip install git+https://github.com/f-utils/f-core/tree/dev
 ```
 
-For other installation options, see [here](https://futils.org/docs/install).
+For other installation options, see [futils.org/install](https://futils.org/docs/libs/install).
 
 # Usage
 
@@ -64,11 +64,8 @@ Globals    g        primite globals
 Specs      s        primitive spectra
 ```
 
-For more details, see:
-
-- [user](https://futils.org/libs/f-core/user): user manual
-- [ref](https://futils.org/libs/f-core/ref): reference manual
+For more details, see [futils.org/libs/f-core](https://futils.org/libs/f-core).
 
 # License
 
-This software is [licensed](./LICENSE) under MIT.
+This software is [licensed](./LICENSE) under BSD.
