@@ -10,8 +10,7 @@ authors = [
 ]
 
 [build-system]
-requires = [
-    "git+https://github.com/f-utils/f",
+requires = [ 
     "setuptools>=61.0",
     "wheel"
 ]
